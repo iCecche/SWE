@@ -1,16 +1,16 @@
 package db;
 
-import class_logic.User;
+import model.User;
 import java.util.List;
 
 public interface UserDAO{
 
-    abstract List<User> search(int id);
+    abstract List<User> search();
 
     abstract void insert(String username, String password);
 
-    abstract void update(Integer id, String username, String password);
+    abstract void update(int id, String username, String password);
 
-    abstract void delete(Integer id);
+    abstract void delete(int id);
 
 }

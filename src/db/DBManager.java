@@ -10,7 +10,7 @@ public class DBManager {
     private static DBManager instance = null;
     private Connection connection;
 
-    // TODO: use singleton for single DB Manager and/or single connection
+    // singleton pattern for single connection to db
     private DBManager() {};
 
     public static DBManager getInstance() throws SQLException {

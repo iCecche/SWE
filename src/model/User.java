@@ -1,4 +1,4 @@
-package class_logic;
+package model;
 
 public class User {
 
@@ -9,6 +9,8 @@ public class User {
     private String cognome;
     private String indirizzo;
     private String cap;
+    private String provincia;
+    private String stato;
 
 
     public User() {};
@@ -16,6 +18,16 @@ public class User {
         this.id = id;
         this.username = username;
         this.password = password;
+    }
+
+    public User(int id, String username, String password, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
+        this(id, username, password);
+        this.nome = nome;
+        this.cognome = cognome;
+        this.indirizzo = indirizzo;
+        this.cap = cap;
+        this.provincia = provincia;
+        this.stato = stato;
     }
 
     public int getId() {
@@ -34,6 +46,12 @@ public class User {
         System.out.println("ID: " + id);
         System.out.println("Username: " + username);
         System.out.println("Password: " + password);
+        System.out.println("Nome: " + nome);
+        System.out.println("Cognome: " + cognome);
+        System.out.println("Indirizzo: " + indirizzo);
+        System.out.println("Cap: " + cap);
+        System.out.println("Provincia: " + provincia);
+        System.out.println("Stato: " + stato);
         System.out.println(" ");
     }
 }
