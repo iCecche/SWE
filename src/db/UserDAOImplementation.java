@@ -23,12 +23,12 @@ public class UserDAOImplementation implements UserDAO{
     // TODO: choose interface or abstract class, implemented search methods must be private (searchAll... only accessible methods)
     @Override
     public List<User> search() {
-        String sql = "SELECT * FROM USER";
+        String sql = "SELECT * FROM USERS";
         return db.execute_statement(sql, mapper);
     }
 
     public List<User> search(String condition, Object... params) {
-        String sql = "SELECT * FROM USER" +
+        String sql = "SELECT * FROM USERS " +
                 condition;
         return db.execute_statement(sql, mapper, params);
     }
@@ -42,6 +42,11 @@ public class UserDAOImplementation implements UserDAO{
         return search("WHERE id = ?", id);
     }
 
+    public List<User> searchByUsername(String username) {
+        username = username.toLowerCase();
+        return search("WHERE username = ?", username);
+    }
+
     public List<User> searchUserInfo(int id) {
         String condition = "JOIN USER_INFO ON USER_INFO.id = USER.ID where USER.ID = ?";
         return search(condition, id);
@@ -49,7 +54,7 @@ public class UserDAOImplementation implements UserDAO{
 
     @Override
     public void insert(String username, String password) {
-        String sql = "INSERT INTO USER (username, password) VALUES(?,?)";
+        String sql = "INSERT INTO USERS (username, password) VALUES(?,?)";
         List<User> processed_rows = db.execute_statement(sql, mapper, username, password);
         processed_rows.forEach(User::print);
     }
@@ -62,12 +67,12 @@ public class UserDAOImplementation implements UserDAO{
 
     @Override
     public List<User> update(int id, String username, String password) {
-        String sql = "update USER set username=?,password=? where id=?";
+        String sql = "update USERS set username=?,password=? where id=?";
         return db.execute_statement(sql, mapper, username, password, id);
     }
 
     public List<User> update(String update_fields, String condition, Object... params) {
-        String sql = "UPDATE USER SET " + update_fields +
+        String sql = "UPDATE USERS SET " + update_fields +
                 "FROM USER " +
                 "JOIN USER_INFO ON USER_INFO.ID = USER.ID " +
                 " WHERE " + condition;
@@ -90,7 +95,7 @@ public class UserDAOImplementation implements UserDAO{
 
     @Override
     public List<User> delete(String condition, Object... params) {
-        String sql = "delete from USER where " + condition;
+        String sql = "delete from USERS where " + condition;
         return db.execute_statement(sql, mapper, params);
     }
 

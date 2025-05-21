@@ -2,14 +2,14 @@ package model;
 
 public class DettaglioOrdine {
 
-    public DettaglioOrdine(int order_id, Product product, int quantity) {
+    public DettaglioOrdine(int order_id, Prodotto product, int quantity) {
         this.order_id = order_id;
         this.product = product;
         this.quantity = quantity;
     }
 
     private int order_id;
-    private Product product;
+    private Prodotto product;
     private int quantity;
 
     public int getOrder_id() {
@@ -20,7 +20,7 @@ public class DettaglioOrdine {
         return quantity;
     }
 
-    public Product getProduct() {
+    public Prodotto getProduct() {
         return product;
     }
 }

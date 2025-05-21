@@ -1,6 +1,6 @@
 package db;
 
-import model.Product;
+import model.Prodotto;
 import rowmapper.ProductMapper;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,20 +21,23 @@ public class ProductDAOImplementation implements ProductDAO {
     }
 
     @Override
-    public List<Product> search() {
+    public List<Prodotto> search() {
         String sql = "select * from PRODUCT";
         return db.execute_statement(sql, mapper);
     }
 
-    public List<Product> search(int id) {
-        String sql = "select * from PRODUCT where id = ?";
-        return db.execute_statement(sql, mapper, id);
+    public List<Prodotto> search(String condition, Object... params) {
+        String sql = "select * from PRODUCT WHERE " + condition;
+        return db.execute_statement(sql, mapper, params);
     }
 
-    public List<Product> search(String name) {
-        String sql = "select * from PRODUCT where lower(nome) = ?";
-        name = name.toLowerCase();
-        return db.execute_statement(sql, mapper, name);
+    public List<Prodotto> searchAll() {
+        return search();
+    }
+
+    public List<Prodotto> searchById(int id) {
+        String condition = "id = ?";
+        return search(condition, id);
     }
 
     @Override

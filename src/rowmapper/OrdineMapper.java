@@ -2,11 +2,10 @@ package rowmapper;
 
 import model.DettaglioOrdine;
 import model.Ordine;
-import model.Product;
+import model.Prodotto;
 import model.StatoOrdine;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.Date;
 import java.sql.SQLException;
 
@@ -24,7 +23,7 @@ public class OrdineMapper extends RowMapper<Ordine> {
         String description = rs.getString("product_name");
         int price = rs.getInt("product_price");
         int stock_quantity = rs.getInt("product_stock_quantity");
-        Product product = new Product(product_id, product_name, description, price, stock_quantity);
+        Prodotto product = new Prodotto(product_id, product_name, description, price, stock_quantity);
 
         int quantity = rs.getInt("order_quantity");
         DettaglioOrdine dettaglio = new DettaglioOrdine(order_id, product, quantity);

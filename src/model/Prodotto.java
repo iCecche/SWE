@@ -1,6 +1,6 @@
 package model;
 
-public class Product {
+public class Prodotto {
 
     private int id;
     private String name;
@@ -8,8 +8,8 @@ public class Product {
     private int price;
     private int stock;
 
-    public Product() {};
-    public Product(int id, String name, String description, int price, int stock) {
+    public Prodotto() {};
+    public Prodotto(int id, String name, String description, int price, int stock) {
         this.id = id;
         this.name = name;
         this.description = description;
