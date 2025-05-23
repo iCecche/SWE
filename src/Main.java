@@ -1,8 +1,5 @@
-import ui.DashboardUI;
-import ui.LoginPanel;
-import ui.RegisterPanel;
-
 import javax.swing.*;
+import ui.LoginPanel;
 
 public class Main {
     public static void main(String[] args) {

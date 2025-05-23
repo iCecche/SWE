@@ -19,6 +19,8 @@ public class LoginPanel extends JFrame {
     private JButton register_button;
     private JButton login_button;
 
+    private UserDAOImplementation userDAO;
+
     public LoginPanel() {
         // TODO: place custom component creation code here
 
@@ -85,35 +87,35 @@ public class LoginPanel extends JFrame {
     }
 
     private void performLogin() {
-        UserDAOImplementation userDAO = new UserDAOImplementation();
-        String user = username_field.getText().trim();
+        userDAO = new UserDAOImplementation();
+        String username = username_field.getText().trim();
         String pass = new String(password_field.getPassword());
 
-        if (user.isEmpty() || pass.isEmpty()) {
+        if (username.isEmpty() || pass.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Inserisci username e password.", "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // USER AUTHENTICATION
-        List<User> users = userDAO.searchByUsername(user);
+        List<User> users = userDAO.searchByUsername(username);
         if (users.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Utente non registrato.", "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        User us = users.getFirst();
-        if (!us.getPassword().equals(pass)) {
+        User user = users.getFirst();
+        if (!user.getPassword().equals(pass)) {
             JOptionPane.showMessageDialog(this, "Password errata.", "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // IF AUTHENTICATION SUCCEEDS, OPEN DASHBOARD
         JOptionPane.showMessageDialog(this, "Login effettuato!", "Successo", JOptionPane.INFORMATION_MESSAGE);
-        openDashboard();
+        openDashboard(user);
     }
 
-    private void openDashboard() {
+    private void openDashboard(User user) {
         dispose(); // chiude la finestra login
-        new DashboardUI().setVisible(true);
+        new DashboardUI(user).setVisible(true);
     }
 }
