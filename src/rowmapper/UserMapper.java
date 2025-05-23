@@ -10,10 +10,14 @@ public class UserMapper extends RowMapper<User> {
 
     @Override
     public User mapRow(ResultSet rs) throws SQLException {
+        String username = null;
+        String password = null;
 
         int id = rs.getInt("id");
-        String username = rs.getString("username");
-        String password = rs.getString("password");
+        if(contains(rs, "username")) {
+            username = rs.getString("username");
+            password = rs.getString("password");
+        }
 
         if(contains(rs, "nome")) {
             String nome = rs.getString("nome");

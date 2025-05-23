@@ -42,6 +42,30 @@ public class User {
         return password;
     }
 
+    public String getNome() {
+        return nome;
+    }
+
+    public String getCognome() {
+        return cognome;
+    }
+
+    public String getIndirizzo() {
+        return indirizzo;
+    }
+
+    public String getCap() {
+        return cap;
+    }
+
+    public String getProvincia() {
+        return provincia;
+    }
+
+    public String getStato() {
+        return stato;
+    }
+
     public void print() {
         System.out.println("ID: " + id);
         System.out.println("Username: " + username);

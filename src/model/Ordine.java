@@ -3,6 +3,12 @@ import java.util.Date;
 
 public class Ordine {
 
+    private int id;
+    private int user_id;
+    private Date date;
+    private DettaglioOrdine dettaglio;
+    private StatoOrdine stato;
+
     public Ordine(int id, int user_id, Date date) {
         this.id = id;
         this.user_id = user_id;
@@ -32,9 +38,23 @@ public class Ordine {
         System.out.println();
     }
 
-    private int id;
-    private int user_id;
-    private Date date;
-    private DettaglioOrdine dettaglio;
-    private StatoOrdine stato;
+    public int getId() {
+        return id;
+    }
+
+    public int getUser_id() {
+        return user_id;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public DettaglioOrdine getDettaglio() {
+        return dettaglio;
+    }
+
+    public StatoOrdine getStato() {
+        return stato;
+    }
 }

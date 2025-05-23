@@ -47,8 +47,13 @@ public class UserDAOImplementation implements UserDAO{
         return search("WHERE username = ?", username);
     }
 
-    public List<User> searchUserInfo(int id) {
-        String condition = "JOIN USER_INFO ON USER_INFO.id = USER.ID where USER.ID = ?";
+    public List<User> searchUsersInfo() {
+        String condition = "JOIN USER_INFO ON USERS.id = USER_INFO.ID";
+        return search(condition);
+    }
+
+    public List<User> searchUserInfoById(int id) {
+        String condition = "JOIN USER_INFO ON USERS.id = USER_INFO.ID where USERS.ID = ?";
         return search(condition, id);
     }
 
@@ -72,10 +77,7 @@ public class UserDAOImplementation implements UserDAO{
     }
 
     public List<User> update(String update_fields, String condition, Object... params) {
-        String sql = "UPDATE USERS SET " + update_fields +
-                "FROM USER " +
-                "JOIN USER_INFO ON USER_INFO.ID = USER.ID " +
-                " WHERE " + condition;
+        String sql = "UPDATE USER_INFO SET " + update_fields + " WHERE " + condition;
         return db.execute_statement(sql, mapper, params);
     }
 
@@ -87,10 +89,10 @@ public class UserDAOImplementation implements UserDAO{
         processed_rows.forEach(User::print); // CLI result view
     }
 
-    public void UpdateUserInfo(int id, String name, String surname, String address, String cap, String province, String email, String phone) {
+    public void UpdateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
         String condition = "id = ?";
-        String update_fields = "name = ?, surname = ?, address = ?, cap = ?, province = ?, email = ?, phone = ?";
-        List<User> processed_rows = update(update_fields, condition, name, surname, address, cap, province, email, phone, id);
+        String update_fields = "nome = ?, cognome = ?, indirizzo = ?, cap = ?, provincia = ?, stato = ? ";
+        update(update_fields, condition, nome, cognome, indirizzo, cap, provincia, stato, id);
     }
 
     @Override
