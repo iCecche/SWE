@@ -1,94 +1,103 @@
 package ui;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.List;
-import db.ProductDAOImplementation;
-import model.Prodotto;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class DashboardUI extends JFrame {
-    private JTable tabella;
-    private DefaultTableModel modello;
-    private ProductDAOImplementation prodottoDAO;
+    private JPanel sidebarPanel;
+    private JPanel contentPanel;
 
     public DashboardUI() {
-        setTitle("Gestione Magazzino");
-        setSize(800, 500);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        setTitle("📦 Dashboard Magazzino");
+        setSize(900, 600);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        // Sidebar
+        sidebarPanel = new JPanel();
+        sidebarPanel.setLayout(new GridLayout(0, 1, 0, 10));
+        sidebarPanel.setBackground(new Color(30, 30, 30));
+        sidebarPanel.setPreferredSize(new Dimension(200, getHeight()));
 
-        // Tabella
-        modello = new DefaultTableModel(new Object[]{"ID", "Nome", "Descrizione", "Prezzo", "Stock"}, 0);
-        tabella = new JTable(modello);
-        add(new JScrollPane(tabella), BorderLayout.CENTER);
-
-        // Pulsanti
-        JPanel panelBottoni = new JPanel();
-
-        JButton btnAggiungi = new JButton("Aggiungi");
-        JButton btnModifica = new JButton("Modifica");
-        JButton btnElimina = new JButton("Elimina");
-
-        panelBottoni.add(btnAggiungi);
-        panelBottoni.add(btnModifica);
-        panelBottoni.add(btnElimina);
-
-        add(panelBottoni, BorderLayout.SOUTH);
-
-        prodottoDAO = new ProductDAOImplementation();
-
-        // Eventi
-        btnAggiungi.addActionListener(e -> {
-            ProdottoDialog dialog = new ProdottoDialog(this, null);
-            dialog.setVisible(true);
-            if (dialog.isSalvato()) {
-                Prodotto new_prod = dialog.getProdotto();
-                prodottoDAO.insert(new_prod.getName(), new_prod.getDescription(), new_prod.getPrice(), new_prod.getStock());
-                load_data();
-            }
+        // Pulsanti menu
+        addSidebarButton("🏠 Home", e -> showHome());
+        addSidebarButton("📦 Prodotti", e -> {
+            JPanel panel = new ProdottiPanel();
+            setContent(panel);
         });
-
-        btnModifica.addActionListener(e -> {
-            int selected = tabella.getSelectedRow();
-            if (selected == -1) {
-                JOptionPane.showMessageDialog(this, "Seleziona un prodotto.");
-                return;
-            }
-            int id = (Integer) modello.getValueAt(selected, 0);
-            List<Prodotto> prods = prodottoDAO.searchById(id);
-            ProdottoDialog dialog = new ProdottoDialog(this, prods.get(0));
-            dialog.setVisible(true);
-            if (dialog.isSalvato()) {
-                Prodotto prod = dialog.getProdotto();
-                prodottoDAO.update(prod.getId(), prod.getName(), prod.getDescription(), prod.getPrice(), prod.getStock());
-                load_data();
-            }
+        addSidebarButton("🧾 Ordini", e -> {
+            JPanel panel = new OrdiniPanel();
+            setContent(panel);
         });
-
-        btnElimina.addActionListener(e -> {
-            int selected = tabella.getSelectedRow();
-            if (selected == -1) {
-                JOptionPane.showMessageDialog(this, "Seleziona un prodotto.");
-                return;
-            }
-            int id = (Integer) modello.getValueAt(selected, 0);
-            prodottoDAO.delete(id);
-            load_data();
+        addSidebarButton("👤 Utenti", e -> {
+            JPanel panel = new UsersPanel();
+            setContent(panel);
         });
+        addSidebarButton("🚪 Logout", e -> logout());
 
-        load_data();
+        // Pannello contenuti
+        contentPanel = new JPanel();
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+
+        // Aggiunta pannelli
+        add(sidebarPanel, BorderLayout.WEST);
+        add(contentPanel, BorderLayout.CENTER);
+
+        showHome();
+
+        setVisible(true);
     }
 
-    private void load_data() {
-        modello.setRowCount(0);
-        List<Prodotto> lista = prodottoDAO.searchAll();
-        for (Prodotto p : lista) {
-            modello.addRow(new Object[]{
-                    p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getStock()
-            });
+    private void addSidebarButton(String text, ActionListener action) {
+        JButton button = new JButton(text);
+        button.setFocusPainted(false);
+        button.setBackground(new Color(45, 45, 45));
+        button.setForeground(Color.WHITE);
+        button.setOpaque(true);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 10));
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.addActionListener(action);
+
+        // On hover
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(new Color(60, 60, 60));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(new Color(45, 45, 45));
+            }
+        });
+
+        sidebarPanel.add(button);
+    }
+
+    private void showHome() {
+        setContent(new JLabel("Benvenuto nella Dashboard!", SwingConstants.CENTER));
+    }
+
+    private void setContent(Component comp) {
+        contentPanel.removeAll();
+        contentPanel.add(comp, BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    private void logout() {
+        int confirm = JOptionPane.showConfirmDialog(this, "Vuoi davvero uscire?", "Logout", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            dispose();
+            new LoginPanel(); // oppure torna alla tua login
         }
     }
 }
