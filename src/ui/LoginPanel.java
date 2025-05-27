@@ -5,7 +5,6 @@ import model.User;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 
 public class LoginPanel extends JFrame {
@@ -116,6 +115,10 @@ public class LoginPanel extends JFrame {
 
     private void openDashboard(User user) {
         dispose(); // chiude la finestra login
-        new DashboardUI(user).setVisible(true);
+        if (user.getRole().equals("ADMIN")) { // TODO: should i use en env variable? an enum? or both?
+            new AdminDashboard().setVisible(true);
+        }else {
+            new UserDashboard(user).setVisible(true);
+        }
     }
 }

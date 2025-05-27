@@ -1,16 +1,18 @@
 package ui;
 
+import model.User;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class DashboardUI extends JFrame {
+public class AdminDashboard extends JFrame {
     private JPanel sidebarPanel;
     private JPanel contentPanel;
 
-    public DashboardUI() {
+    public AdminDashboard() {
 
         setTitle("📦 Dashboard Magazzino");
         setSize(900, 600);
