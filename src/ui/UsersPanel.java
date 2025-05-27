@@ -61,14 +61,14 @@ public class UsersPanel extends JPanel {
         panelBottoni.add(btnElimina);
 
         // Eventi
-        btnAggiungi.addActionListener(this::addButtonCollback);
-        btnModifica.addActionListener(this::modifyButtonCollback);
-        btnElimina.addActionListener(this::deleteButtonCollback);
+        btnAggiungi.addActionListener(this::addButtonCallback);
+        btnModifica.addActionListener(this::modifyButtonCallback);
+        btnElimina.addActionListener(this::deleteButtonCallback);
 
         return panelBottoni;
     }
 
-    private void addButtonCollback(ActionEvent e) {
+    private void addButtonCallback(ActionEvent e) {
         Map<String, Object> campi = new LinkedHashMap<>();
         campi.put("Username", "Nome del prodotto...");
         campi.put("Password", "Descrizione del prodotto...");
@@ -84,7 +84,7 @@ public class UsersPanel extends JPanel {
         });
     }
 
-    private void modifyButtonCollback(ActionEvent e) {
+    private void modifyButtonCallback(ActionEvent e) {
         int selected = tabella.getSelectedRow();
         if (selected == -1) {
             JOptionPane.showMessageDialog(null, "Seleziona un prodotto.");
@@ -119,7 +119,7 @@ public class UsersPanel extends JPanel {
         });
     }
 
-    private void deleteButtonCollback(ActionEvent e) {
+    private void deleteButtonCallback(ActionEvent e) {
         int selected = tabella.getSelectedRow();
         if (selected == -1) {
             JOptionPane.showMessageDialog(null, "Seleziona un prodotto.");

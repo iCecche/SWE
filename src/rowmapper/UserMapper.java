@@ -14,6 +14,7 @@ public class UserMapper extends RowMapper<User> {
         String password = null;
 
         int id = rs.getInt("id");
+        String role = rs.getString("role");
         if(contains(rs, "username")) {
             username = rs.getString("username");
             password = rs.getString("password");
@@ -26,9 +27,9 @@ public class UserMapper extends RowMapper<User> {
             String cap = rs.getString("cap");
             String provincia = rs.getString("provincia");
             String stato = rs.getString("stato");
-            return new User(id, username, password, nome, cognome, indirizzo, cap, provincia, stato);
+            return new User(id, username, password, role, nome, cognome, indirizzo, cap, provincia, stato);
         }
 
-        return new User(id, username, password);
+        return new User(id, username, password, role);
     }
 }
