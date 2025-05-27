@@ -14,24 +14,20 @@ public class OrdineMapper extends RowMapper<Ordine> {
     @Override
     public Ordine mapRow (ResultSet rs) throws SQLException {
 
-        int order_id = rs.getInt("order_id");
-        int user_id = rs.getInt("user_id");
-        Date date = rs.getDate("date");
+        if(contains(rs, "order_id")) {
+            int order_id = rs.getInt("order_id");
+            int user_id = rs.getInt("user_id");
+            Date date = rs.getDate("date");
+            int product_id = rs.getInt("product_id");
+            int quantity = rs.getInt("quantity");
+            String stato_pagamento = rs.getString("stato_pagamento");
+            String stato_consegna = rs.getString("stato_consegna");
 
-        int product_id = rs.getInt("product_id");
-        String product_name = rs.getString("product_name");
-        String description = rs.getString("product_name");
-        int price = rs.getInt("product_price");
-        int stock_quantity = rs.getInt("product_stock_quantity");
-        Prodotto product = new Prodotto(product_id, product_name, description, price, stock_quantity);
+            return new Ordine(order_id, user_id, date, product_id, quantity, stato_pagamento, stato_consegna);
+        }else {
+            int order_id = rs.getInt(1);
+            return new Ordine(order_id);
+        }
 
-        int quantity = rs.getInt("order_quantity");
-        DettaglioOrdine dettaglio = new DettaglioOrdine(order_id, product, quantity);
-
-        String order_status = rs.getString("order_status");
-        String payment_status = rs.getString("payment_status");
-        StatoOrdine stato = new StatoOrdine(order_id, order_status, payment_status);
-
-        return new Ordine(order_id, user_id, date, dettaglio, stato);
     }
 }

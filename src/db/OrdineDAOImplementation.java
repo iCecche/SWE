@@ -3,7 +3,7 @@ import model.Ordine;
 import rowmapper.OrdineMapper;
 
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class OrdineDAOImplementation implements OrdineDAO {
@@ -22,21 +22,21 @@ public class OrdineDAOImplementation implements OrdineDAO {
     // TODO: choose interface or abstract class, implemented search methods must be private (searchAll... only accessible methods)
     @Override
     public List<Ordine> search() {
-        String sql = "SELECT" + " O.id as order_id, O.user_id as user_id, O.date as date, P.id as product_id, P.name as product_name, P.description as product_description, P.price as product_price, P.stock_quantity as product_stock_quantity, OD.quantity as order_quantity, OS.stato_consegna as order_status, OS.stato_pagamento as payment_status" +
-                " FROM ORDERS as O" +
-                " JOIN ORDERS_DETAILS as OD ON OD.id = O.id" +
-                " JOIN PRODUCT as P ON P.id = OD.product" +
-                " JOIN ORDERS_STATUS as OS ON O.stato_ordine = OS.id";
+        String sql = "SELECT o.id AS order_id, o.user_id, o.date as date, d.product AS product_id, d.quantity, s.stato_pagamento, s.stato_consegna " +
+            "FROM ORDERS o " +
+            "JOIN ORDERS_STATUS s ON o.id = s.order_id " +
+            "JOIN ORDERS_DETAILS d ON d.order_id = o.id " +
+            "ORDER BY o.id";
         return db.execute_statement(sql, mapper);
     }
 
     public List<Ordine> search(String condition, Object... params) {
-        String sql = "SELECT" + " O.id as order_id, O.user_id as user_id, O.date as date, P.id as product_id, P.name as product_name, P.description as product_description, P.price as product_price, P.stock_quantity as product_stock_quantity, OD.quantity as order_quantity, OS.stato_consegna as order_status, OS.stato_pagamento as payment_status" +
-                " FROM ORDERS as O" +
-                " JOIN ORDERS_DETAILS as OD ON OD.id = O.id" +
-                " JOIN PRODUCT as P ON P.id = OD.product" +
-                " JOIN ORDERS_STATUS as OS ON O.stato_ordine = OS.id " +
-                condition;
+        String sql = "SELECT o.id AS order_id, o.user_id, o.date as date, d.product AS product_id, d.quantity, s.stato_pagamento, s.stato_consegna " +
+                "FROM ORDERS o " +
+                "JOIN ORDERS_STATUS s ON o.id = s.order_id " +
+                "JOIN ORDERS_DETAILS d ON d.order_id = o.id " +
+                condition + " " +
+                "ORDER BY o.id" ;
         return db.execute_statement(sql, mapper, params);
     }
 
@@ -45,11 +45,11 @@ public class OrdineDAOImplementation implements OrdineDAO {
     }
 
     public List<Ordine> searchByUserID(int user_id) {
-        return search("WHERE O.user_id = ?", user_id);
+        return search("WHERE user_id = ?", user_id);
     }
 
     public List<Ordine> searchByProductID(int product_id) {
-        return search("WHERE P.id = ?", product_id);
+        return search("WHERE prodotto = ?", product_id);
     }
 
     public List<Ordine> searchByProductName(String product_name) {
@@ -58,20 +58,37 @@ public class OrdineDAOImplementation implements OrdineDAO {
     }
 
     @Override
-    public void insert() {
-        String sql = "INSERT INTO ORDERS (id_cliente, data, stato_ordine, dettaglio_ordine) VALUES(?,?,?,?)";
-        db.execute_statement(sql, mapper);
+    public int insert(Object... params) {
+        String sql = "INSERT INTO ORDERS (user_id, date) VALUES(?,?)";
+        List<Ordine> orders = db.execute_statement(sql, mapper, params);
+        return orders.getFirst().getOrder_id();
+    }
+
+    public int newOrder(int user_id) {
+        Date date = new Date(System.currentTimeMillis());
+        return insert(user_id, date);
     }
 
     @Override
-    public void update() {
-        String sql = "UPDATE ORDERS set id_cliente = ?, data = ?, stato_ordine = ?, dettaglio_ordine = ? where id_cliente = ?";
-        db.execute_statement(sql, mapper);
+    public void update(String update_fields, String condition, Object... params) {
+        String sql = "UPDATE ORDERS set " + update_fields + condition;
+        db.execute_statement(sql, mapper, params);
+    }
+
+    public void updateOrder(int user_id, Date date, int order_id) {
+        String update_fields = "user_id = ?, date = ? ";
+        String condition = "where id = ?";
+        update(update_fields, condition, user_id, date, order_id);
     }
 
     @Override
-    public void delete() {
-        String sql = "DELETE FROM ORDERS where id = ?";
-        db.execute_statement(sql, mapper);
+    public void delete(String condition, Object... params) {
+        String sql = "DELETE FROM ORDERS " + condition;
+        db.execute_statement(sql, mapper, params);
+    }
+
+    public void deleteOrder(int order_id) {
+        String condition = "where id = ?";
+        delete(condition, order_id);
     }
 }

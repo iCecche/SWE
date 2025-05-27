@@ -6,9 +6,12 @@ import model.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OrdiniPanel extends JPanel {
 
@@ -18,23 +21,31 @@ public class OrdiniPanel extends JPanel {
 
     public OrdiniPanel() {
         Object[] table_model = new Object[]{"Order ID", "User ID", "Date", "Product ID", "Quantity", "Order Status", "Payment Status"};
-        setUpPanel(table_model);
+        setUpPanel(table_model, null);
         load_data();
     }
 
     public OrdiniPanel(int userId) {
         Object[] table_model = new Object[]{"Order ID", "Date", "Product ID", "Quantity", "Order Status", "Payment Status"};
-        setUpPanel(table_model);
+        setUpPanel(table_model, userId);
         load_data(userId);
     }
 
-    private void setUpPanel(Object[] table_model) {
+    private void setUpPanel(Object[] table_model, Integer userId) {
         setSize(800, 500);
         setLayout(new BorderLayout());
 
-        JPanel panelBottoni = createButtons();
-        add(panelBottoni, BorderLayout.SOUTH);
+        JPanel panelBottoni;
 
+        if(userId == null)
+            panelBottoni = createButtons();
+        else {
+            panelBottoni = new JPanel();
+            JButton btnAggiungi = new JButton("Aggiungi");
+            panelBottoni.add(btnAggiungi);
+        }
+
+        add(panelBottoni, BorderLayout.SOUTH);
         tabella = createTable(table_model);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
@@ -72,7 +83,8 @@ public class OrdiniPanel extends JPanel {
     }
 
     private void UserIdCellCallback(int row, int col) {
-        if (col == 1) {
+        tabella.convertColumnIndexToModel(col);
+        if (col == 1 && tabella.getColumnName(col).equals("User ID")) {
             Object value = tabella.getValueAt(row, col);
             if (value != null) {
                 int userId = Integer.parseInt(value.toString());
@@ -87,7 +99,8 @@ public class OrdiniPanel extends JPanel {
     }
 
     private void ProdottoIdCellCallback(int row, int col) {
-        if (col == 3) {
+        tabella.convertColumnIndexToModel(col);
+        if (col == 3 && tabella.getColumnName(col).equals("Product ID")) {
             Object value = tabella.getValueAt(row, col);
             if (value != null) {
                 int prodottoId = Integer.parseInt(value.toString());
@@ -109,6 +122,10 @@ public class OrdiniPanel extends JPanel {
         JButton btnModifica = new JButton("Modifica");
         JButton btnElimina = new JButton("Elimina");
 
+        btnAggiungi.addActionListener(this::addButtonCallback);
+        btnModifica.addActionListener(this::modifyButtonCallback);
+        btnElimina.addActionListener(this::deleteButtonCallback);
+
         panelBottoni.add(btnAggiungi);
         panelBottoni.add(btnModifica);
         panelBottoni.add(btnElimina);
@@ -116,15 +133,24 @@ public class OrdiniPanel extends JPanel {
         return panelBottoni;
     }
 
+    private void addButtonCallback(ActionEvent e) {
+        mostraCarrello();
+    }
+
+    private void modifyButtonCallback(ActionEvent e) {
+
+    }
+
+    private void deleteButtonCallback(ActionEvent e) {
+
+    }
+
     private void load_data() {
         modello.setRowCount(0);
         List<Ordine> lista = ordineDAO.searchAll();
         for (Ordine ordine : lista) {
-            DettaglioOrdine dettaglio = ordine.getDettaglio();
-            Prodotto prod = dettaglio.getProduct();
-            StatoOrdine status = ordine.getStato();
             modello.addRow(new Object[]{
-                    ordine.getId(), ordine.getUser_id(), ordine.getDate(), prod.getId(), dettaglio.getQuantity(), status.getOrder_status(), status.getPayment_status()
+                    ordine.getOrder_id(), ordine.getUser_id(), ordine.getDate(), ordine.getProduct_id(), ordine.getQuantity(), ordine.getStato_consegna(), ordine.getStato_pagamento()
             });
         }
     }
@@ -133,11 +159,8 @@ public class OrdiniPanel extends JPanel {
         modello.setRowCount(0);
         List<Ordine> lista = ordineDAO.searchByUserID(userId);
         for (Ordine ordine : lista) {
-            DettaglioOrdine dettaglio = ordine.getDettaglio();
-            Prodotto prod = dettaglio.getProduct();
-            StatoOrdine status = ordine.getStato();
             modello.addRow(new Object[]{
-                    ordine.getId(), ordine.getDate(), prod.getId(), dettaglio.getQuantity(), status.getOrder_status(), status.getPayment_status()
+                    ordine.getOrder_id(), ordine.getUser_id(), ordine.getDate(), ordine.getProduct_id(), ordine.getQuantity(), ordine.getStato_consegna(), ordine.getStato_pagamento()
             });
         }
     }
@@ -150,6 +173,11 @@ public class OrdiniPanel extends JPanel {
     public void mostraDettaglioProdotto(int prodottoId) {
         Container parent = getParent();
         setContent(new ProdottiPanel(prodottoId), parent);
+    }
+
+    public void mostraCarrello() {
+        Container parent = getParent();
+        setContent(new CartPanel(), parent);
     }
 
     private void setContent(Component comp, Container parent) {

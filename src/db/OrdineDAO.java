@@ -5,9 +5,9 @@ import java.util.List;
 
 public interface OrdineDAO {
 
-    abstract List<Ordine> search();
-    abstract void insert();
-    abstract void update();
-    abstract void delete();
+    List<Ordine> search();
+    int insert(Object... params);
+    void update(String update_fields, String condition, Object... params);
+    void delete(String condition, Object... params);
 
 }
