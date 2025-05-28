@@ -12,18 +12,24 @@ import db.ProductDAOImplementation;
 import model.Prodotto;
 
 public class ProdottiPanel extends JPanel {
+
+    private JPanel panelBottoni;
     private JTable tabella;
     private DefaultTableModel modello;
     private ProductDAOImplementation prodottoDAO;
 
-    public ProdottiPanel() {
+    public ProdottiPanel(boolean isAdmin) {
         setUpPanel();
         load_data();
+
+        if(!isAdmin)
+            panelBottoni.setVisible(false);
     }
 
     public ProdottiPanel(int prodottoId) {
         setUpPanel();
         load_data(prodottoId);
+        panelBottoni.setVisible(false);
     }
 
     private void setUpPanel() {
@@ -35,15 +41,15 @@ public class ProdottiPanel extends JPanel {
         tabella = new JTable(modello);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
-        JPanel panelBottoni = createButtons();
+        createButtons();
         add(panelBottoni, BorderLayout.SOUTH);
 
         prodottoDAO = new ProductDAOImplementation();
     }
 
-    private JPanel createButtons() {
+    private void createButtons() {
         // Pulsanti
-        JPanel panelBottoni = new JPanel();
+        panelBottoni = new JPanel();
 
         JButton btnAggiungi = new JButton("Aggiungi");
         JButton btnModifica = new JButton("Modifica");
@@ -57,8 +63,6 @@ public class ProdottiPanel extends JPanel {
         btnAggiungi.addActionListener(this::addButtonCollback);
         btnModifica.addActionListener(this::modifyButtonCollback);
         btnElimina.addActionListener(this::deleteButtonCollback);
-
-        return  panelBottoni;
     }
 
     private void addButtonCollback(ActionEvent e) {

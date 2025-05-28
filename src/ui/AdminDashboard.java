@@ -29,7 +29,7 @@ public class AdminDashboard extends JFrame {
         // Pulsanti menu
         addSidebarButton("🏠 Home", e -> showHome());
         addSidebarButton("📦 Prodotti", e -> {
-            JPanel panel = new ProdottiPanel();
+            JPanel panel = new ProdottiPanel(true);
             setContent(panel);
         });
         addSidebarButton("🧾 Ordini", e -> {

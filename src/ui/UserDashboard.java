@@ -30,7 +30,7 @@ public class UserDashboard extends JFrame {
         // Pulsanti menu
         addSidebarButton("🏠 Home", e -> showHome());
         addSidebarButton("📦 Prodotti", e -> {
-            JPanel panel = new ProdottiPanel(); // TODO: vietare modifiche al db se role == utente
+            JPanel panel = new ProdottiPanel(false); // TODO: vietare modifiche al db se role == utente
             setContent(panel);
         });
         addSidebarButton("🧾 Ordini", e -> {
