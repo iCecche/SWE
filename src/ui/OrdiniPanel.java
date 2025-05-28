@@ -48,7 +48,6 @@ public class OrdiniPanel extends JPanel {
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
         ordineDAO = new OrdineDAOImplementation();
-
     }
 
     private DefaultTableModel createTableModel(Object[] table_model) {
@@ -117,16 +116,16 @@ public class OrdiniPanel extends JPanel {
         panelBottoni = new JPanel();
 
         JButton btnAggiungi = new JButton("Aggiungi");
-        JButton btnModifica = new JButton("Modifica");
         JButton btnElimina = new JButton("Elimina");
-
-        btnAggiungi.addActionListener(this::adminAddButtonCallback);
-        btnModifica.addActionListener(this::modifyButtonCallback);
-        btnElimina.addActionListener(this::deleteButtonCallback);
+        JButton btnSpedisci = new JButton("Spedisci");
 
         panelBottoni.add(btnAggiungi);
-        panelBottoni.add(btnModifica);
         panelBottoni.add(btnElimina);
+        panelBottoni.add(btnSpedisci);
+
+        btnAggiungi.addActionListener(this::adminAddButtonCallback);
+        btnElimina.addActionListener(this::deleteButtonCallback);
+        btnSpedisci.addActionListener(this::shipButtonCallback);
     }
 
     private void createUserButtons() {
@@ -149,10 +148,6 @@ public class OrdiniPanel extends JPanel {
     private void userAddButtonCallback(ActionEvent e) {
         Container parent = getParent();
         mostraCarrello(userId, parent);
-    }
-
-    private void modifyButtonCallback(ActionEvent e) {
-
     }
 
     private void deleteButtonCallback(ActionEvent e) {
@@ -190,8 +185,35 @@ public class OrdiniPanel extends JPanel {
         StatoOrdineDAOImplementation statoOrdineDAO = new StatoOrdineDAOImplementation();
         statoOrdineDAO.updatePaymentStatus(new_order_status);
 
-        System.out.println("Ordine pagato con successo."); //FIXME:
+        System.out.println("L'ordine pagato con successo.");
         load_data(userId);
+    }
+
+    private void shipButtonCallback(ActionEvent e) {
+        int selectedRow = tabella.getSelectedRow();
+        if(selectedRow == -1 ) {
+            JOptionPane.showMessageDialog(null, "Seleziona un ordine.");
+            return;
+        }
+
+        String order_status = (String) tabella.getValueAt(selectedRow, 5);
+        OrderStatus status = OrderStatus.fromString(order_status);
+
+        if(status == OrderStatus.SHIPPED || status == OrderStatus.DELIVERED) {
+            JOptionPane.showMessageDialog(null, "L'ordine è già stato gestito.");
+            return;
+        }
+
+        int order_id = (int) modello.getValueAt(selectedRow, 0);
+        StatoOrdine new_order_status = new StatoOrdine();
+        new_order_status.setOrder_id(order_id);
+        new_order_status.setOrder_status(OrderStatus.SHIPPED);
+
+        StatoOrdineDAOImplementation statoOrdineDAO = new StatoOrdineDAOImplementation();
+        statoOrdineDAO.updateOrderStatus(new_order_status);
+
+        System.out.println("L'ordine è stato gestito con successo.");
+        load_data();
     }
 
     private void load_data() {
