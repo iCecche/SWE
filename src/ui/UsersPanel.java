@@ -1,20 +1,23 @@
 package ui;
 
 import db.UserDAOImplementation;
-import model.Prodotto;
 import model.User;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class UsersPanel extends JPanel {
     private JTable tabella;
     private DefaultTableModel modello;
+    private JPanel panelBottoni;
     private UserDAOImplementation userDAO;
 
     public UsersPanel() {
@@ -25,6 +28,23 @@ public class UsersPanel extends JPanel {
     public UsersPanel(int userId ) {
         setUpPanel();
         load_data(userId);
+    }
+
+    public UsersPanel(Consumer<Integer> onUserSelected) {
+        this();
+        panelBottoni.setVisible(false);
+        tabella.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    int row = tabella.getSelectedRow();
+                    if (row != -1) {
+                        int userId = (int) modello.getValueAt(row, 0);
+                        onUserSelected.accept(userId);
+                    }
+                }
+            }
+        });
     }
 
     private void setUpPanel() {
@@ -42,15 +62,13 @@ public class UsersPanel extends JPanel {
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
         // Pulsanti
-        JPanel panelBottoni = createButtons();
-        add(panelBottoni, BorderLayout.SOUTH);
-
+        createButtons();
         userDAO = new UserDAOImplementation();
     }
 
-    private JPanel createButtons() {
+    private void createButtons() {
         // Pulsanti
-        JPanel panelBottoni = new JPanel();
+        panelBottoni = new JPanel();
 
         JButton btnAggiungi = new JButton("Aggiungi");
         JButton btnModifica = new JButton("Modifica");
@@ -65,7 +83,7 @@ public class UsersPanel extends JPanel {
         btnModifica.addActionListener(this::modifyButtonCallback);
         btnElimina.addActionListener(this::deleteButtonCallback);
 
-        return panelBottoni;
+        add(panelBottoni, BorderLayout.SOUTH);
     }
 
     private void addButtonCallback(ActionEvent e) {

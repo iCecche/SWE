@@ -22,19 +22,19 @@ public class OrdineDAOImplementation implements OrdineDAO {
     // TODO: choose interface or abstract class, implemented search methods must be private (searchAll... only accessible methods)
     @Override
     public List<Ordine> search() {
-        String sql = "SELECT o.id AS order_id, o.user_id, o.date as date, d.product AS product_id, d.quantity, s.stato_pagamento, s.stato_consegna " +
+        String sql = "SELECT o.id AS order_id, o.user_id, o.date as date, d.product_id AS product_id, d.quantity, s.stato_pagamento, s.stato_consegna " +
             "FROM ORDERS o " +
-            "JOIN ORDERS_STATUS s ON o.id = s.order_id " +
-            "JOIN ORDERS_DETAILS d ON d.order_id = o.id " +
+            "LEFT JOIN ORDERS_STATUS s ON o.id = s.order_id " +
+            "LEFT JOIN ORDERS_DETAILS d ON d.order_id = o.id " + // FIXME: JOIN TYPE
             "ORDER BY o.id";
         return db.execute_statement(sql, mapper);
     }
 
     public List<Ordine> search(String condition, Object... params) {
-        String sql = "SELECT o.id AS order_id, o.user_id, o.date as date, d.product AS product_id, d.quantity, s.stato_pagamento, s.stato_consegna " +
+        String sql = "SELECT o.id AS order_id, o.user_id, o.date as date, d.product_id AS product_id, d.quantity, s.stato_pagamento, s.stato_consegna " +
                 "FROM ORDERS o " +
-                "JOIN ORDERS_STATUS s ON o.id = s.order_id " +
-                "JOIN ORDERS_DETAILS d ON d.order_id = o.id " +
+                "LEFT JOIN ORDERS_STATUS s ON o.id = s.order_id " +
+                "LEFT JOIN ORDERS_DETAILS d ON d.order_id = o.id " +
                 condition + " " +
                 "ORDER BY o.id" ;
         return db.execute_statement(sql, mapper, params);
@@ -64,9 +64,8 @@ public class OrdineDAOImplementation implements OrdineDAO {
         return orders.getFirst().getOrder_id();
     }
 
-    public int newOrder(int user_id) {
-        Date date = new Date(System.currentTimeMillis());
-        return insert(user_id, date);
+    public int newOrder(Ordine order) {
+        return insert(order.getUser_id(), order.getDate());
     }
 
     @Override

@@ -1,9 +1,6 @@
 package rowmapper;
 
-import model.DettaglioOrdine;
-import model.Ordine;
-import model.Prodotto;
-import model.StatoOrdine;
+import model.*;
 
 import java.sql.ResultSet;
 import java.util.Date;
@@ -20,8 +17,8 @@ public class OrdineMapper extends RowMapper<Ordine> {
             Date date = rs.getDate("date");
             int product_id = rs.getInt("product_id");
             int quantity = rs.getInt("quantity");
-            String stato_pagamento = rs.getString("stato_pagamento");
-            String stato_consegna = rs.getString("stato_consegna");
+            PaymentStatus stato_pagamento = PaymentStatus.fromString(rs.getString("stato_pagamento"));
+            OrderStatus stato_consegna = OrderStatus.fromString(rs.getString("stato_consegna"));
 
             return new Ordine(order_id, user_id, date, product_id, quantity, stato_pagamento, stato_consegna);
         }else {

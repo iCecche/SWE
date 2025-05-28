@@ -8,14 +8,18 @@ public class Ordine {
     private Date date;
     int product_id;
     int quantity;
-    String stato_pagamento;
-    String stato_consegna;
+    PaymentStatus stato_pagamento;
+    OrderStatus stato_consegna;
+
+    public Ordine() {
+
+    }
 
     public Ordine(int order_id) {
         this.order_id = order_id;
     }
 
-    public Ordine(int order_id, int user_id, Date date, int product_id, int quantity, String stato_pagamento, String stato_consegna) {
+    public Ordine(int order_id, int user_id, Date date, int product_id, int quantity, PaymentStatus stato_pagamento, OrderStatus stato_consegna) {
         this.order_id = order_id;
         this.user_id = user_id;
         this.date = date;
@@ -57,10 +61,38 @@ public class Ordine {
     }
 
     public String getStato_pagamento() {
-        return stato_pagamento;
+        return stato_pagamento.toString();
     }
 
     public String getStato_consegna() {
-        return stato_consegna;
+        return stato_consegna.toString();
+    }
+
+    public void setOrder_id(int order_id) {
+        this.order_id = order_id;
+    }
+
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setProduct_id(int product_id) {
+        this.product_id = product_id;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setStato_pagamento(PaymentStatus stato_pagamento) {
+        this.stato_pagamento = stato_pagamento;
+    }
+
+    public void setStato_consegna(OrderStatus stato_consegna) {
+        this.stato_consegna = stato_consegna;
     }
 }

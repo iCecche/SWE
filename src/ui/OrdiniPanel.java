@@ -9,15 +9,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OrdiniPanel extends JPanel {
 
     private JTable tabella;
     private DefaultTableModel modello;
     private OrdineDAOImplementation ordineDAO;
+    private Integer userId;
 
     public OrdiniPanel() {
         Object[] table_model = new Object[]{"Order ID", "User ID", "Date", "Product ID", "Quantity", "Order Status", "Payment Status"};
@@ -29,6 +28,7 @@ public class OrdiniPanel extends JPanel {
         Object[] table_model = new Object[]{"Order ID", "Date", "Product ID", "Quantity", "Order Status", "Payment Status"};
         setUpPanel(table_model, userId);
         load_data(userId);
+        this.userId = userId;
     }
 
     private void setUpPanel(Object[] table_model, Integer userId) {
@@ -42,6 +42,7 @@ public class OrdiniPanel extends JPanel {
         else {
             panelBottoni = new JPanel();
             JButton btnAggiungi = new JButton("Aggiungi");
+            btnAggiungi.addActionListener(this::addButtonCallback);
             panelBottoni.add(btnAggiungi);
         }
 
@@ -84,7 +85,7 @@ public class OrdiniPanel extends JPanel {
 
     private void UserIdCellCallback(int row, int col) {
         tabella.convertColumnIndexToModel(col);
-        if (col == 1 && tabella.getColumnName(col).equals("User ID")) {
+        if (tabella.getColumnName(col).equals("User ID")) {
             Object value = tabella.getValueAt(row, col);
             if (value != null) {
                 int userId = Integer.parseInt(value.toString());
@@ -93,14 +94,14 @@ public class OrdiniPanel extends JPanel {
                 System.out.println("Hai cliccato sull'user_id: " + userId);
 
                 // Esempio: apri un nuovo pannello o aggiorna la tabella
-                mostraDettagliUtente(userId);
+                mostraDettagliUtente(userId, getParent());
             }
         }
     }
 
     private void ProdottoIdCellCallback(int row, int col) {
         tabella.convertColumnIndexToModel(col);
-        if (col == 3 && tabella.getColumnName(col).equals("Product ID")) {
+        if (tabella.getColumnName(col).equals("Product ID")) {
             Object value = tabella.getValueAt(row, col);
             if (value != null) {
                 int prodottoId = Integer.parseInt(value.toString());
@@ -109,7 +110,7 @@ public class OrdiniPanel extends JPanel {
                 System.out.println("Hai cliccato sull'prodotto: " + prodottoId);
 
                 // Esempio: apri un nuovo pannello o aggiorna la tabella
-                mostraDettaglioProdotto(prodottoId);
+                mostraDettaglioProdotto(prodottoId, getParent());
             }
         }
     }
@@ -134,7 +135,12 @@ public class OrdiniPanel extends JPanel {
     }
 
     private void addButtonCallback(ActionEvent e) {
-        mostraCarrello();
+        Container parent = getParent();
+        if(isUserIdDefined()) {
+            mostraCarrello(userId, parent);
+        }else {
+            mostraUserSelection(parent);
+        }
     }
 
     private void modifyButtonCallback(ActionEvent e) {
@@ -142,7 +148,15 @@ public class OrdiniPanel extends JPanel {
     }
 
     private void deleteButtonCallback(ActionEvent e) {
+        int selectedRow = tabella.getSelectedRow();
+        if(selectedRow == -1 ) {
+            JOptionPane.showMessageDialog(null, "Seleziona un ordine.");
+            return;
+        }
 
+        int id = (int) modello.getValueAt(selectedRow, 0);
+        ordineDAO.deleteOrder(id);
+        load_data();
     }
 
     private void load_data() {
@@ -160,24 +174,25 @@ public class OrdiniPanel extends JPanel {
         List<Ordine> lista = ordineDAO.searchByUserID(userId);
         for (Ordine ordine : lista) {
             modello.addRow(new Object[]{
-                    ordine.getOrder_id(), ordine.getUser_id(), ordine.getDate(), ordine.getProduct_id(), ordine.getQuantity(), ordine.getStato_consegna(), ordine.getStato_pagamento()
+                    ordine.getOrder_id(), ordine.getDate(), ordine.getProduct_id(), ordine.getQuantity(), ordine.getStato_consegna(), ordine.getStato_pagamento()
             });
         }
     }
 
-    public void mostraDettagliUtente(int userId) {
-        Container parent = getParent();
+    public void mostraDettagliUtente(int userId, Container parent) {
         setContent(new UsersPanel(userId), parent);
     }
 
-    public void mostraDettaglioProdotto(int prodottoId) {
-        Container parent = getParent();
+    public void mostraDettaglioProdotto(int prodottoId, Container parent) {
         setContent(new ProdottiPanel(prodottoId), parent);
     }
 
-    public void mostraCarrello() {
-        Container parent = getParent();
-        setContent(new CartPanel(), parent);
+    public void mostraUserSelection(Container parent) {
+        setContent(new UsersPanel(userId -> mostraCarrello(userId, parent)), parent);
+    }
+
+    public void mostraCarrello(int userId, Container parent) {
+        setContent(new CartPanel(userId), parent);
     }
 
     private void setContent(Component comp, Container parent) {
@@ -185,5 +200,9 @@ public class OrdiniPanel extends JPanel {
         parent.add(comp, BorderLayout.CENTER);
         parent.revalidate();
         parent.repaint();
+    }
+
+    private boolean isUserIdDefined() {
+        return userId != null;
     }
 }
