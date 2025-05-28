@@ -1,6 +1,7 @@
 package ui;
 
 import db.OrdineDAOImplementation;
+import db.StatoOrdineDAOImplementation;
 import model.*;
 
 import javax.swing.*;
@@ -13,6 +14,7 @@ import java.util.List;
 
 public class OrdiniPanel extends JPanel {
 
+    private JPanel panelBottoni;
     private JTable tabella;
     private DefaultTableModel modello;
     private OrdineDAOImplementation ordineDAO;
@@ -25,28 +27,23 @@ public class OrdiniPanel extends JPanel {
     }
 
     public OrdiniPanel(int userId) {
+        this.userId = userId;
         Object[] table_model = new Object[]{"Order ID", "Date", "Product ID", "Quantity", "Order Status", "Payment Status"};
         setUpPanel(table_model, userId);
         load_data(userId);
-        this.userId = userId;
     }
 
     private void setUpPanel(Object[] table_model, Integer userId) {
         setSize(800, 500);
         setLayout(new BorderLayout());
 
-        JPanel panelBottoni;
-
-        if(userId == null)
-            panelBottoni = createButtons();
+        if(isUser())
+            createUserButtons();
         else {
-            panelBottoni = new JPanel();
-            JButton btnAggiungi = new JButton("Aggiungi");
-            btnAggiungi.addActionListener(this::addButtonCallback);
-            panelBottoni.add(btnAggiungi);
+            createAdminButtons();
         }
-
         add(panelBottoni, BorderLayout.SOUTH);
+
         tabella = createTable(table_model);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
@@ -115,32 +112,43 @@ public class OrdiniPanel extends JPanel {
         }
     }
 
-    private JPanel createButtons() {
+    private void createAdminButtons() {
         // Pulsanti
-        JPanel panelBottoni = new JPanel();
+        panelBottoni = new JPanel();
 
         JButton btnAggiungi = new JButton("Aggiungi");
         JButton btnModifica = new JButton("Modifica");
         JButton btnElimina = new JButton("Elimina");
 
-        btnAggiungi.addActionListener(this::addButtonCallback);
+        btnAggiungi.addActionListener(this::adminAddButtonCallback);
         btnModifica.addActionListener(this::modifyButtonCallback);
         btnElimina.addActionListener(this::deleteButtonCallback);
 
         panelBottoni.add(btnAggiungi);
         panelBottoni.add(btnModifica);
         panelBottoni.add(btnElimina);
-
-        return panelBottoni;
     }
 
-    private void addButtonCallback(ActionEvent e) {
+    private void createUserButtons() {
+        panelBottoni = new JPanel();
+        JButton btnAggiungi = new JButton("Aggiungi");
+        JButton btnPaga = new JButton("Paga");
+
+        panelBottoni.add(btnAggiungi);
+        panelBottoni.add(btnPaga);
+
+        btnAggiungi.addActionListener(this::userAddButtonCallback);
+        btnPaga.addActionListener(this::pagaButtonCallback);
+    }
+
+    private void adminAddButtonCallback(ActionEvent e) {
         Container parent = getParent();
-        if(isUserIdDefined()) {
-            mostraCarrello(userId, parent);
-        }else {
-            mostraUserSelection(parent);
-        }
+        mostraUserSelection(parent);
+    }
+
+    private void userAddButtonCallback(ActionEvent e) {
+        Container parent = getParent();
+        mostraCarrello(userId, parent);
     }
 
     private void modifyButtonCallback(ActionEvent e) {
@@ -157,6 +165,33 @@ public class OrdiniPanel extends JPanel {
         int id = (int) modello.getValueAt(selectedRow, 0);
         ordineDAO.deleteOrder(id);
         load_data();
+    }
+
+    private void pagaButtonCallback(ActionEvent e) {
+        int selectedRow = tabella.getSelectedRow();
+        if(selectedRow == -1 ) {
+            JOptionPane.showMessageDialog(null, "Seleziona un ordine.");
+            return;
+        }
+
+        String paymentStatus = (String) tabella.getValueAt(selectedRow, 5);
+        PaymentStatus status = PaymentStatus.fromString(paymentStatus);
+
+        if(status == PaymentStatus.PAID) {
+            JOptionPane.showMessageDialog(null, "L'ordine è già stato pagato.");
+            return;
+        }
+
+        int order_id = (int) modello.getValueAt(selectedRow, 0);
+        StatoOrdine new_order_status = new StatoOrdine();
+        new_order_status.setOrder_id(order_id);
+        new_order_status.setPayment_status(PaymentStatus.PAID);
+
+        StatoOrdineDAOImplementation statoOrdineDAO = new StatoOrdineDAOImplementation();
+        statoOrdineDAO.updatePaymentStatus(new_order_status);
+
+        System.out.println("Ordine pagato con successo."); //FIXME:
+        load_data(userId);
     }
 
     private void load_data() {
@@ -202,7 +237,7 @@ public class OrdiniPanel extends JPanel {
         parent.repaint();
     }
 
-    private boolean isUserIdDefined() {
+    private boolean isUser() {
         return userId != null;
     }
 }

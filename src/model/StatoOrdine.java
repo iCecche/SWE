@@ -28,4 +28,16 @@ public class StatoOrdine {
     public PaymentStatus getPayment_status() {
         return payment_status;
     }
+
+    public void setPayment_status(PaymentStatus payment_status) {
+        this.payment_status = payment_status;
+    }
+
+    public void setOrder_status(OrderStatus order_status) {
+        this.order_status = order_status;
+    }
+
+    public void setOrder_id(int order_id) {
+        this.order_id = order_id;
+    }
 }

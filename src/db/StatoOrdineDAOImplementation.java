@@ -30,7 +30,16 @@ public class StatoOrdineDAOImplementation implements StatoOrdineDAO {
     }
 
     @Override
-    public void update(int order_id, String order_status, String payment_status) {
+    public void update(String update_fields, String condition, Object... params) {
+        String sql = "UPDATE ORDERS_STATUS SET " + update_fields + " WHERE " + condition;
+        db.execute_statement(sql, mapper, params);
+    }
 
+    public void updateOrderStatus(StatoOrdine order_status) {
+        update("stato_consegna = ?::order_status ", "order_id = ?", order_status.getOrder_status().toString(), order_status.getId());
+    }
+
+    public void updatePaymentStatus(StatoOrdine order_status) {
+        update("stato_pagamento = ?::payment_status ", "order_id = ?", order_status.getPayment_status().toString(), order_status.getId());
     }
 }

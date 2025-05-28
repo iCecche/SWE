@@ -164,6 +164,8 @@ public class CartPanel extends JPanel {
             StatoOrdine order_status = new StatoOrdine(order_id, OrderStatus.PENDING, PaymentStatus.PENDING);
             statoOrdineDAO.inserOrderStatus(order_status);
             System.out.println("Ordine creato con id: " + order_id);
+
+            setContent(new OrdiniPanel(userId), getParent());
         }
     }
 
@@ -175,5 +177,12 @@ public class CartPanel extends JPanel {
                     p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getStock()
             });
         }
+    }
+
+    private void setContent(Component comp, Container parent) {
+        parent.removeAll();
+        parent.add(comp, BorderLayout.CENTER);
+        parent.revalidate();
+        parent.repaint();
     }
 }
