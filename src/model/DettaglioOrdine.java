@@ -2,15 +2,17 @@ package model;
 
 public class DettaglioOrdine {
 
-    public DettaglioOrdine(int order_id, Prodotto product, int quantity) {
+    private int order_id;
+    private int product_id;
+    private int quantity;
+
+    public DettaglioOrdine() {};
+
+    public DettaglioOrdine(int order_id, int product_id,  int quantity) {
         this.order_id = order_id;
-        this.product = product;
+        this.product_id = product_id;
         this.quantity = quantity;
     }
-
-    private int order_id;
-    private Prodotto product;
-    private int quantity;
 
     public int getOrder_id() {
         return order_id;
@@ -20,7 +22,23 @@ public class DettaglioOrdine {
         return quantity;
     }
 
-    public Prodotto getProduct() {
-        return product;
+    public int getProduct() {
+        return product_id;
+    }
+
+    public void setOrder_id(int order_id) {
+        this.order_id = order_id;
+    }
+
+    public int getProduct_id() {
+        return product_id;
+    }
+
+    public void setProduct_id(int product_id) {
+        this.product_id = product_id;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }
