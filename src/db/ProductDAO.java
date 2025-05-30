@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface ProductDAO {
 
-    abstract List<Prodotto> search();
+    abstract QueryResult<Prodotto> search();
 
     abstract void insert(String name, String description, Integer price, Integer stock_quantity);
 

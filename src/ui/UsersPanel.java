@@ -2,6 +2,7 @@ package ui;
 
 import db.UserDAOImplementation;
 import model.User;
+import model.UserRole;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -73,31 +74,40 @@ public class UsersPanel extends JPanel {
         JButton btnAggiungi = new JButton("Aggiungi");
         JButton btnModifica = new JButton("Modifica");
         JButton btnElimina = new JButton("Elimina");
+        JButton btnRole = new JButton("Role");
 
         panelBottoni.add(btnAggiungi);
         panelBottoni.add(btnModifica);
         panelBottoni.add(btnElimina);
+        panelBottoni.add(btnRole);
 
         // Eventi
         btnAggiungi.addActionListener(this::addButtonCallback);
         btnModifica.addActionListener(this::modifyButtonCallback);
         btnElimina.addActionListener(this::deleteButtonCallback);
+        btnRole.addActionListener(this::roleButtonCallback);
 
         add(panelBottoni, BorderLayout.SOUTH);
     }
 
     private void addButtonCallback(ActionEvent e) {
         Map<String, Object> campi = new LinkedHashMap<>();
-        campi.put("Username", "Nome del prodotto...");
-        campi.put("Password", "Descrizione del prodotto...");
+        campi.put("Username", "Username...");
+        campi.put("Password", "Password...");
+        campi.put("Nome", "Nome utente...");
+        campi.put("Cognome", "Cognome utente...");
+        campi.put("Role", "ADMIN or USER");
 
         // Mostra dialog dinamico
         new Dialog(null,"Aggiungi Utente", campi, valoriInseriti -> {
 
             String username = valoriInseriti.get("Username");
             String password = valoriInseriti.get("Password");
+            String nome = valoriInseriti.get("Nome");
+            String cognome = valoriInseriti.get("Cognome");
+            UserRole role = UserRole.fromString(valoriInseriti.get("Role"));
 
-            userDAO.insert(username, password);
+            userDAO.insert(username, password, role, nome, cognome);
             load_data();
         });
     }
@@ -109,8 +119,12 @@ public class UsersPanel extends JPanel {
             return;
         }
         int id = (Integer) modello.getValueAt(selected, 0);
-        List<User> users = userDAO.searchUserInfoById(id);
-        User user = users.getFirst();
+        User user = userDAO.searchUserInfoById(id);
+
+        if(user == null) {
+            JOptionPane.showMessageDialog(null, "Utente non trovato.");
+            return;
+        }
 
         Map<String, Object> campi = new LinkedHashMap<>();
         campi.put("Username", user.getUsername());
@@ -121,6 +135,7 @@ public class UsersPanel extends JPanel {
         campi.put("Cap", user.getCap());
         campi.put("Provincia", user.getProvincia());
         campi.put("Stato",user.getStato());
+        campi.put("Role", user.getRole().toString());
 
         // Mostra dialog dinamico
         new Dialog(null,"Modifica Utente", campi, valoriInseriti -> {
@@ -148,6 +163,10 @@ public class UsersPanel extends JPanel {
         load_data();
     }
 
+    private void roleButtonCallback(ActionEvent e) {
+
+    }
+
     private void setContent(Component comp, Container parent) {
         parent.removeAll();
         parent.add(comp, BorderLayout.CENTER);
@@ -167,11 +186,13 @@ public class UsersPanel extends JPanel {
 
     private void load_data(int userId) {
         modello.setRowCount(0);
-        List<User> userList = userDAO.searchUserInfoById(userId);
-        for (User user : userList) {
-            modello.addRow(new Object[]{
-                    user.getId(),user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato()
-            });
+        User user = userDAO.searchUserInfoById(userId);
+        if(user == null) {
+            JOptionPane.showMessageDialog(null, "Utente non trovato.");
+            return;
         }
+        modello.addRow(new Object[]{
+                user.getId(),user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato()
+        });
     }
 }

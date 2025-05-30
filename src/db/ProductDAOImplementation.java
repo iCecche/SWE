@@ -21,23 +21,23 @@ public class ProductDAOImplementation implements ProductDAO {
     }
 
     @Override
-    public List<Prodotto> search() {
+    public QueryResult<Prodotto> search() {
         String sql = "select * from PRODUCT";
-        return db.execute_query(sql, mapper).getResults();
+        return db.execute_query(sql, mapper);
     }
 
-    public List<Prodotto> search(String condition, Object... params) {
+    public QueryResult<Prodotto> search(String condition, Object... params) {
         String sql = "select * from PRODUCT WHERE " + condition;
-        return db.execute_query(sql, mapper, params).getResults();
+        return db.execute_query(sql, mapper, params);
     }
 
     public List<Prodotto> searchAll() {
-        return search();
+        return search().getResults();
     }
 
-    public List<Prodotto> searchById(int id) {
+    public Prodotto searchById(int id) {
         String condition = "id = ?";
-        return search(condition, id);
+        return search(condition, id).getSingleResult().orElseThrow();
     }
 
     @Override

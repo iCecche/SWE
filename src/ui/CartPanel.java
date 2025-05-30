@@ -141,32 +141,28 @@ public class CartPanel extends JPanel {
 
     private void saveButtonCallback(ActionEvent e) {
         if(modelloCart.getRowCount() > 0) {
-            Ordine ordine = new Ordine();
-            ordine.setUser_id(userId);
+            OrdineBuilder builder = OrdineBuilder.create();
+            builder.withUserId(userId);
 
             Timestamp date = new Timestamp(System.currentTimeMillis());
-            ordine.setDate(date);
+            builder.withDate(date);
 
-            int order_id = ordineDAO.newOrder(ordine);
-            if(order_id == -1) {
-                JOptionPane.showMessageDialog(null, "Errore durante la creazione dell'ordine.");
-                return;
-            }
+            builder.withPaymentStatus(PaymentStatus.PENDING);
+            builder.withDeliveryStatus(DeliveryStatus.PENDING);
 
             for(int i = 0; i < modelloCart.getRowCount(); i++) {
                 int product_id = (int) modelloCart.getValueAt(i, 0);
                 int quantity = (int) modelloCart.getValueAt(i, 3);
 
                 DettaglioOrdine details = new DettaglioOrdine();
-                details.setOrder_id(order_id);
                 details.setProduct_id(product_id);
                 details.setQuantity(quantity);
 
-                dettaglioOrdineDAO.newOrderDetail(details);
+                builder.withDetails(details);
             }
-            StatoOrdine order_status = new StatoOrdine(order_id, DeliveryStatus.PENDING, PaymentStatus.PENDING);
-            statoOrdineDAO.inserOrderStatus(order_status);
-            System.out.println("Ordine creato con id: " + order_id);
+
+            Ordine ordine = builder.build();
+            ordineDAO.insertNewOrder(ordine);
 
             if (isAdmin)
                 setContent(new OrdiniPanel(), getParent());

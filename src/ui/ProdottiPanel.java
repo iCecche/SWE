@@ -96,14 +96,12 @@ public class ProdottiPanel extends JPanel {
         int id = (Integer) modello.getValueAt(selected, 0);
 
         // Recupero prodotto dal DB
-        List<Prodotto> prods = prodottoDAO.searchById(id);
+        Prodotto prod = prodottoDAO.searchById(id);
 
-        if (prods.isEmpty()) {
+        if (prod == null) {
             JOptionPane.showMessageDialog(null, "Prodotto non trovato.");
             return;
         }
-
-        Prodotto prod = prods.getFirst();
 
         // Costruzione dinamica dei campi da mostrare
         Map<String, Object> campi = new LinkedHashMap<>();
@@ -148,11 +146,11 @@ public class ProdottiPanel extends JPanel {
 
     private void load_data(int prodottoId) {
         modello.setRowCount(0);
-        List<Prodotto> lista = prodottoDAO.searchById(prodottoId);
-        for (Prodotto p : lista) {
-            modello.addRow(new Object[]{
-                    p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getStock()
-            });
-        }
+        Prodotto prod = prodottoDAO.searchById(prodottoId);
+
+        modello.addRow(new Object[]{
+                prod.getId(), prod.getName(), prod.getDescription(), prod.getPrice(), prod.getStock()
+        });
+
     }
 }

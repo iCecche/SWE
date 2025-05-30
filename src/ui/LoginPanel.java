@@ -2,6 +2,7 @@ package ui;
 
 import db.UserDAOImplementation;
 import model.User;
+import model.UserRole;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +10,6 @@ import java.util.List;
 
 public class LoginPanel extends JFrame {
 
-    private JFrame mainframe;
     private JLabel login_page_label;
     private JLabel username_label;
     private JLabel password_label;
@@ -96,13 +96,12 @@ public class LoginPanel extends JFrame {
         }
 
         // USER AUTHENTICATION
-        List<User> users = userDAO.searchByUsername(username);
-        if (users.isEmpty()) {
+        User user = userDAO.searchByUsername(username);
+        if (user == null) {
             JOptionPane.showMessageDialog(this, "Utente non registrato.", "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        User user = users.getFirst();
         if (!user.getPassword().equals(pass)) {
             JOptionPane.showMessageDialog(this, "Password errata.", "Errore", JOptionPane.ERROR_MESSAGE);
             return;
@@ -115,7 +114,7 @@ public class LoginPanel extends JFrame {
 
     private void openDashboard(User user) {
         dispose(); // chiude la finestra login
-        if (user.getRole().equals("ADMIN")) { // TODO: should i use en env variable? an enum? or both?
+        if (user.getRole().equals(UserRole.ADMIN)) {
             new AdminDashboard().setVisible(true);
         }else {
             new UserDashboard(user).setVisible(true);

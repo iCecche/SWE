@@ -22,10 +22,6 @@ public class DettaglioOrdine {
         return quantity;
     }
 
-    public int getProduct() {
-        return product_id;
-    }
-
     public void setOrder_id(int order_id) {
         this.order_id = order_id;
     }

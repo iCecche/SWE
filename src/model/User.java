@@ -5,7 +5,7 @@ public class User {
     private int id;
     private String username;
     private String password;
-    private String role;
+    private UserRole role;
     private String nome;
     private String cognome;
     private String indirizzo;
@@ -15,14 +15,14 @@ public class User {
 
 
     public User() {};
-    public User(int id, String username, String password, String role) {
+    public User(int id, String username, String password, UserRole role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
     }
 
-    public User(int id, String username, String password, String role, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
+    public User(int id, String username, String password, UserRole role, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
         this(id, username, password, role);
         this.nome = nome;
         this.cognome = cognome;
@@ -44,7 +44,7 @@ public class User {
         return password;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 

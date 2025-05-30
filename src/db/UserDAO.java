@@ -1,13 +1,14 @@
 package db;
 
 import model.User;
+import model.UserRole;
+
 import java.util.List;
 
 public interface UserDAO{
 
-    List<User> search();
-
-    void insert(String username, String password);
+    QueryResult<User> search();
+    void insert(String username, String password, UserRole role, String nome, String cognome);
 
     List<User> update(int id, String username, String password);
 

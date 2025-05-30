@@ -1,6 +1,7 @@
 package rowmapper;
 
 import model.User;
+import model.UserRole;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -12,11 +13,11 @@ public class UserMapper extends RowMapper<User> {
     public User mapRow(ResultSet rs) throws SQLException {
         String username = null;
         String password = null;
-        String role = null;
+        UserRole role = null;
 
         int id = rs.getInt("id");
         if(contains(rs, "role"))
-         role = rs.getString("role");
+            role = UserRole.fromString(rs.getString("role"));
         if(contains(rs, "username")) {
             username = rs.getString("username");
             password = rs.getString("password");

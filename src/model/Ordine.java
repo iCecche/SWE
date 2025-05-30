@@ -1,4 +1,5 @@
 package model;
+import java.util.List;
 import java.util.Date;
 
 public class Ordine {
@@ -6,22 +7,20 @@ public class Ordine {
     private int order_id;
     private int user_id;
     private Date date;
-    int product_id;
-    int quantity;
-    PaymentStatus payment_status;
-    DeliveryStatus delivery_status;
+    private List<DettaglioOrdine> details;
+    private PaymentStatus payment_status;
+    private DeliveryStatus delivery_status;
 
     public Ordine() {
 
     }
 
 
-    public Ordine(int order_id, int user_id, Date date, int product_id, int quantity, PaymentStatus stato_pagamento, DeliveryStatus stato_consegna) {
+    public Ordine(int order_id, int user_id, Date date, List<DettaglioOrdine> details, PaymentStatus stato_pagamento, DeliveryStatus stato_consegna) {
         this.order_id = order_id;
         this.user_id = user_id;
         this.date = date;
-        this.product_id = product_id;
-        this.quantity = quantity;
+        this.details = details;
         this.payment_status = stato_pagamento;
         this.delivery_status = stato_consegna;
     }
@@ -30,19 +29,17 @@ public class Ordine {
         System.out.println("OrderId: " + order_id);
         System.out.println("UserId: " + user_id);
         System.out.println("Date: " + date);
-        System.out.println("ProductId: " + product_id);
-        System.out.println("Order_Quantity: " + quantity);
         System.out.println("Order_Status: " + delivery_status);
         System.out.println("Payment_Status: " + payment_status);
+        for( DettaglioOrdine detail : details) {
+            System.out.println("Product: " + detail.getProduct_id());
+            System.out.println("Quantity: " + detail.getQuantity());
+        }
         System.out.println();
     }
 
     public int getOrder_id() {
         return order_id;
-    }
-
-    public int getProduct_id() {
-        return product_id;
     }
 
     public int getUser_id() {
@@ -53,8 +50,8 @@ public class Ordine {
         return date;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public List<DettaglioOrdine> getDetails() {
+        return details;
     }
 
     public String getPayment_status() {
@@ -63,6 +60,14 @@ public class Ordine {
 
     public String getDelivery_status() {
         return delivery_status.toString();
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return payment_status;
+    }
+
+    public DeliveryStatus getDeliveryStatus() {
+        return delivery_status;
     }
 
     public void setOrder_id(int order_id) {
@@ -75,5 +80,17 @@ public class Ordine {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public void setDetails(List<DettaglioOrdine> details) {
+        this.details = details;
+        for (DettaglioOrdine detail : details) {
+            detail.setOrder_id(order_id);
+        }
+    }
+
+    public void setDetails(DettaglioOrdine detail) {
+        this.details.add(detail);
+        detail.setOrder_id(order_id);
     }
 }
