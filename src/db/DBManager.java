@@ -4,21 +4,23 @@ import rowmapper.RowMapper;
 
 import java.sql.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DBManager {
 
-    private static DBManager instance = null;
+    private static final AtomicReference<DBManager> instance = new AtomicReference<>();
     private Connection connection;
 
+    private final ThreadLocal<Connection> transactionConnection = new ThreadLocal<>();
+    private final ThreadLocal<Boolean> inTransaction = new ThreadLocal<>();
+
     // singleton pattern for a single connection to db
-    private DBManager() {};
+    private DBManager() {
+        this.inTransaction.set(false);
+    };
 
     public static DBManager getInstance() throws SQLException {
-        if(instance == null || instance.getConnection().isClosed()) {
-            instance = new DBManager();
-            instance.connect();
-        }
-        return instance;
+        return instance.updateAndGet(dbManager -> dbManager != null ? dbManager : new DBManager());
     }
 
     public Connection getConnection() {
@@ -33,7 +35,10 @@ public class DBManager {
             // Register the PostgreSQL driver
             Class.forName("org.postgresql.Driver");
             // Connect to the database
-            connection = DriverManager.getConnection(jdbcUrl, username, password);
+            if(Boolean.TRUE.equals(inTransaction.get()))
+                connection = transactionConnection.get();
+            else
+                connection = DriverManager.getConnection(jdbcUrl, username, password);
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -46,6 +51,67 @@ public class DBManager {
             e.printStackTrace();
         }
     }
+
+    public <T> T execute_transaction(TransactionCallback<T> callback) {
+        try {
+            beginTransaction();
+            T result = callback.execute();
+            commitTransaction();
+            return result;
+        }catch (Exception e) {
+            rollbackTransaction();
+            throw new RuntimeException("Errore durante l'esecuzione della transazione", e);
+        } finally {
+            endTransaction();
+        }
+    }
+
+    private void beginTransaction() throws SQLException {
+        if(Boolean.TRUE.equals(inTransaction.get())) {
+            throw new SQLException("Already in a transaction!");
+        }
+        connect();
+        inTransaction.set(true);
+        connection.setAutoCommit(false);
+        transactionConnection.set(connection);
+    }
+
+    private void commitTransaction() {
+        try {
+            Connection connection = transactionConnection.get();
+            if(connection != null) {
+                connection.commit();
+            }
+        }catch (SQLException e) {
+            throw new RuntimeException("Error during commit!", e);
+        }
+    }
+
+    private void rollbackTransaction()  {
+        try {
+            Connection connection = transactionConnection.get();
+            if(connection != null) {
+                connection.rollback();
+            }
+        }catch (SQLException e) {
+            throw new RuntimeException("Error during rollback!", e);
+        }
+    }
+
+    private void endTransaction() {
+        try {
+            disconnect();
+        } finally {
+            transactionConnection.remove();
+            inTransaction.set(false);
+        }
+    }
+
+    @FunctionalInterface
+    public interface TransactionCallback<T> {
+        T execute() throws SQLException;
+    }
+
 
     public <T> QueryResult<T> execute_query(String sql, RowMapper<T> mapper, Object... params) {
         QueryResult<T> query_result;
@@ -68,7 +134,9 @@ public class DBManager {
         }catch (SQLException e) {
             throw new RuntimeException(e);
         }finally {
-            disconnect();
+            if (!Boolean.TRUE.equals(inTransaction.get()) && connection != null) {
+                disconnect();
+            }
         }
         return query_result;
     }
@@ -83,8 +151,6 @@ public class DBManager {
             statement.close();
         }catch (SQLException e) {
             throw new RuntimeException(e);
-        }finally {
-            disconnect();
         }
         return QueryResult.ofSelect(processed_rows);
     }
