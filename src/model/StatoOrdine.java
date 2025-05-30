@@ -3,17 +3,17 @@ package model;
 public class StatoOrdine {
 
     private int order_id;
-    private OrderStatus order_status;
+    private DeliveryStatus delivery_status;
     private PaymentStatus payment_status;
 
     public StatoOrdine() {
         this.payment_status = PaymentStatus.PENDING;
-        this.order_status = OrderStatus.PENDING;
+        this.delivery_status = DeliveryStatus.PENDING;
     }
 
-    public StatoOrdine(int order_id, OrderStatus order_status, PaymentStatus payment_status) {
+    public StatoOrdine(int order_id, DeliveryStatus order_status, PaymentStatus payment_status) {
         this.order_id = order_id;
-        this.order_status = order_status;
+        this.delivery_status = order_status;
         this.payment_status = payment_status;
     }
 
@@ -21,8 +21,8 @@ public class StatoOrdine {
         return order_id;
     }
 
-    public OrderStatus getOrder_status() {
-        return order_status;
+    public DeliveryStatus getDelivery_status() {
+        return delivery_status;
     }
 
     public PaymentStatus getPayment_status() {
@@ -33,8 +33,8 @@ public class StatoOrdine {
         this.payment_status = payment_status;
     }
 
-    public void setOrder_status(OrderStatus order_status) {
-        this.order_status = order_status;
+    public void setDelivery_status(DeliveryStatus delivery_status) {
+        this.delivery_status = delivery_status;
     }
 
     public void setOrder_id(int order_id) {

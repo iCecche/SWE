@@ -26,7 +26,7 @@ public class StatoOrdineDAOImplementation implements StatoOrdineDAO {
     }
 
     public void inserOrderStatus(StatoOrdine order_status) {
-        insert(order_status.getId(), order_status.getOrder_status().toString(), order_status.getPayment_status().toString());
+        insert(order_status.getId(), order_status.getDelivery_status().toString(), order_status.getPayment_status().toString());
     }
 
     @Override
@@ -35,8 +35,8 @@ public class StatoOrdineDAOImplementation implements StatoOrdineDAO {
         db.execute_statement(sql, mapper, params);
     }
 
-    public void updateOrderStatus(StatoOrdine order_status) {
-        update("stato_consegna = ?::order_status ", "order_id = ?", order_status.getOrder_status().toString(), order_status.getId());
+    public void updateDeliveryStatus(StatoOrdine order_status) {
+        update("stato_consegna = ?::order_status ", "order_id = ?", order_status.getDelivery_status().toString(), order_status.getId());
     }
 
     public void updatePaymentStatus(StatoOrdine order_status) {

@@ -48,12 +48,12 @@ public class UserDAOImplementation implements UserDAO{
     }
 
     public List<User> searchUsersInfo() {
-        String condition = "JOIN USER_INFO ON USERS.id = USER_INFO.ID";
+        String condition = "LEFT JOIN USER_INFO ON USERS.id = USER_INFO.ID";
         return search(condition);
     }
 
     public List<User> searchUserInfoById(int id) {
-        String condition = "JOIN USER_INFO ON USERS.id = USER_INFO.ID where USERS.ID = ?";
+        String condition = "LEFT JOIN USER_INFO ON USERS.id = USER_INFO.ID where USERS.ID = ?";
         return search(condition, id);
     }
 

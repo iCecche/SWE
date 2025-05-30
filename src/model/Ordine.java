@@ -8,25 +8,22 @@ public class Ordine {
     private Date date;
     int product_id;
     int quantity;
-    PaymentStatus stato_pagamento;
-    OrderStatus stato_consegna;
+    PaymentStatus payment_status;
+    DeliveryStatus delivery_status;
 
     public Ordine() {
 
     }
 
-    public Ordine(int order_id) {
-        this.order_id = order_id;
-    }
 
-    public Ordine(int order_id, int user_id, Date date, int product_id, int quantity, PaymentStatus stato_pagamento, OrderStatus stato_consegna) {
+    public Ordine(int order_id, int user_id, Date date, int product_id, int quantity, PaymentStatus stato_pagamento, DeliveryStatus stato_consegna) {
         this.order_id = order_id;
         this.user_id = user_id;
         this.date = date;
         this.product_id = product_id;
         this.quantity = quantity;
-        this.stato_pagamento = stato_pagamento;
-        this.stato_consegna = stato_consegna;
+        this.payment_status = stato_pagamento;
+        this.delivery_status = stato_consegna;
     }
 
     public void print() {
@@ -35,8 +32,8 @@ public class Ordine {
         System.out.println("Date: " + date);
         System.out.println("ProductId: " + product_id);
         System.out.println("Order_Quantity: " + quantity);
-        System.out.println("Order_Status: " + stato_consegna);
-        System.out.println("Payment_Status: " + stato_pagamento);
+        System.out.println("Order_Status: " + delivery_status);
+        System.out.println("Payment_Status: " + payment_status);
         System.out.println();
     }
 
@@ -60,12 +57,12 @@ public class Ordine {
         return quantity;
     }
 
-    public String getStato_pagamento() {
-        return stato_pagamento.toString();
+    public String getPayment_status() {
+        return payment_status.toString();
     }
 
-    public String getStato_consegna() {
-        return stato_consegna.toString();
+    public String getDelivery_status() {
+        return delivery_status.toString();
     }
 
     public void setOrder_id(int order_id) {
@@ -78,21 +75,5 @@ public class Ordine {
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public void setProduct_id(int product_id) {
-        this.product_id = product_id;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public void setStato_pagamento(PaymentStatus stato_pagamento) {
-        this.stato_pagamento = stato_pagamento;
-    }
-
-    public void setStato_consegna(OrderStatus stato_consegna) {
-        this.stato_consegna = stato_consegna;
     }
 }

@@ -12,9 +12,11 @@ public class UserMapper extends RowMapper<User> {
     public User mapRow(ResultSet rs) throws SQLException {
         String username = null;
         String password = null;
+        String role = null;
 
         int id = rs.getInt("id");
-        String role = rs.getString("role");
+        if(contains(rs, "role"))
+         role = rs.getString("role");
         if(contains(rs, "username")) {
             username = rs.getString("username");
             password = rs.getString("password");

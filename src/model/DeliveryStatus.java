@@ -1,11 +1,11 @@
 package model;
 
-public enum OrderStatus {
+public enum DeliveryStatus {
     PENDING,
     SHIPPED,
     DELIVERED;
 
-    public static OrderStatus fromString(String value) {
+    public static DeliveryStatus fromString(String value) {
         try {
             return valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {

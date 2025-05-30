@@ -11,13 +11,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CartPanel extends JPanel {
 
+    private boolean isAdmin = false;
     private int userId;
-    private List<DettaglioOrdine> cartList;
     private JPanel panelBottoni;
     private JTable producTable, cartTable;
     private DefaultTableModel modelloCart, modelloProdotti;
@@ -26,7 +25,7 @@ public class CartPanel extends JPanel {
     private DettaglioOrdineDAOImplementation dettaglioOrdineDAO;
     private StatoOrdineDAOImplementation statoOrdineDAO;
 
-    public CartPanel(int userId) {
+    public CartPanel(int userId, boolean isAdmin) {
 
         setSize(800, 500);
         setLayout(new BorderLayout());
@@ -69,7 +68,7 @@ public class CartPanel extends JPanel {
 
         load_data();
         this.userId = userId;
-        this.cartList = new ArrayList<DettaglioOrdine>();
+        this.isAdmin = isAdmin;
     }
 
     private void createButtons() {
@@ -161,11 +160,14 @@ public class CartPanel extends JPanel {
 
                 dettaglioOrdineDAO.newOrderDetail(details);
             }
-            StatoOrdine order_status = new StatoOrdine(order_id, OrderStatus.PENDING, PaymentStatus.PENDING);
+            StatoOrdine order_status = new StatoOrdine(order_id, DeliveryStatus.PENDING, PaymentStatus.PENDING);
             statoOrdineDAO.inserOrderStatus(order_status);
             System.out.println("Ordine creato con id: " + order_id);
 
-            setContent(new OrdiniPanel(userId), getParent());
+            if (isAdmin)
+                setContent(new OrdiniPanel(), getParent());
+            else
+                setContent(new OrdiniPanel(userId), getParent());
         }
     }
 
