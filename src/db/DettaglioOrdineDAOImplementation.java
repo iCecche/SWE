@@ -23,7 +23,7 @@ public class DettaglioOrdineDAOImplementation implements DettaglioOrdineDAO {
     @Override
     public void insert(Object... params) {
         String sql = "INSERT INTO ORDERS_DETAILS (order_id, product_id, quantity) VALUES(?,?,?)";
-        db.execute_statement(sql, mapper, params);
+        db.execute_query(sql, mapper, params);
     }
 
     public void newOrderDetail(DettaglioOrdine order_detail) {

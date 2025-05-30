@@ -10,7 +10,7 @@ public class DBManager {
     private static DBManager instance = null;
     private Connection connection;
 
-    // singleton pattern for single connection to db
+    // singleton pattern for a single connection to db
     private DBManager() {};
 
     public static DBManager getInstance() throws SQLException {
@@ -47,9 +47,8 @@ public class DBManager {
         }
     }
 
-    public <T> List<T> execute_statement(String sql, RowMapper<T> mapper, Object... params) {
-        ResultSet rs;
-        List<T> processed_rows;
+    public <T> QueryResult<T> execute_query(String sql, RowMapper<T> mapper, Object... params) {
+        QueryResult<T> query_result;
         connect();
         try {
             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -61,24 +60,64 @@ public class DBManager {
 
             // multi-row fetch
             statement.setFetchSize(0);
-
-            if (sql.trim().toLowerCase().startsWith("select")) {
-                rs = statement.executeQuery();  // Execute SELECT
-            } else {
-                statement.executeUpdate();  // Execute INSERT, UPDATE, DELETE
-                rs = statement.getGeneratedKeys();
+            if(isSelectQuery(sql)) {
+                query_result = execute_select(statement, mapper);
+            }else {
+                query_result = execute_update(statement, mapper);
             }
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }finally {
+            disconnect();
+        }
+        return query_result;
+    }
 
-            // map ResultSet to correct type java object
+    private <T> QueryResult<T> execute_select(PreparedStatement statement, RowMapper<T> mapper) {
+        List<T> processed_rows;
+        try {
+            ResultSet rs = statement.executeQuery();
             processed_rows = mapper.process(rs);
 
             rs.close();
             statement.close();
-        } catch (SQLException e) {
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }finally {
+            disconnect();
+        }
+        return QueryResult.ofSelect(processed_rows);
+    }
+
+    private <T> QueryResult<T> execute_update(PreparedStatement statement, RowMapper<T> mapper) {
+        long id;
+        T result;
+        try {
+            int affectedRows = statement.executeUpdate();
+            if(affectedRows == 0) {
+                throw new SQLException("No rows affected!");
+            }
+
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs.next()) {
+                id = rs.getLong(1);
+                // Process the result only if needed
+                List<T> processed_rows = mapper.process(rs);
+                result = !processed_rows.isEmpty() ? processed_rows.getFirst() : null;
+            }else {
+                throw new SQLException("No generated key returned!");
+            }
+
+            rs.close();
+            statement.close();
+        }catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        disconnect();
-        return processed_rows;
+        return QueryResult.ofInsert(id, result);
+    }
+
+    private boolean isSelectQuery(String sql) {
+        return sql.trim().toLowerCase().startsWith("select");
     }
 }

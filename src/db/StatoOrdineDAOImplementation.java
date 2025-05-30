@@ -22,7 +22,7 @@ public class StatoOrdineDAOImplementation implements StatoOrdineDAO {
     @Override
     public void insert(int order_id, String order_status, String payment_status) {
         String sql = "INSERT INTO ORDERS_STATUS (order_id, stato_pagamento, stato_consegna) VALUES(?, ?::payment_status, ?::order_status)";
-        db.execute_statement(sql, mapper, order_id, order_status, payment_status);
+        db.execute_query(sql, mapper, order_id, order_status, payment_status);
     }
 
     public void inserOrderStatus(StatoOrdine order_status) {
@@ -32,7 +32,7 @@ public class StatoOrdineDAOImplementation implements StatoOrdineDAO {
     @Override
     public void update(String update_fields, String condition, Object... params) {
         String sql = "UPDATE ORDERS_STATUS SET " + update_fields + " WHERE " + condition;
-        db.execute_statement(sql, mapper, params);
+        db.execute_query(sql, mapper, params);
     }
 
     public void updateDeliveryStatus(StatoOrdine order_status) {

@@ -5,6 +5,7 @@ import rowmapper.OrdineMapper;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class OrdineDAOImplementation implements OrdineDAO {
     private final DBManager db;
@@ -27,7 +28,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
             "LEFT JOIN ORDERS_STATUS s ON o.id = s.order_id " +
             "LEFT JOIN ORDERS_DETAILS d ON d.order_id = o.id " + // FIXME: JOIN TYPE
             "ORDER BY o.id";
-        return db.execute_statement(sql, mapper);
+        return db.execute_query(sql, mapper).getResults();
     }
 
     public List<Ordine> search(String condition, Object... params) {
@@ -37,7 +38,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
                 "LEFT JOIN ORDERS_DETAILS d ON d.order_id = o.id " +
                 condition + " " +
                 "ORDER BY o.id" ;
-        return db.execute_statement(sql, mapper, params);
+        return db.execute_query(sql, mapper, params).getResults();
     }
 
     public List<Ordine> searchAll() {
@@ -60,8 +61,8 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public int insert(Object... params) {
         String sql = "INSERT INTO ORDERS (user_id, date) VALUES(?,?)";
-        List<Ordine> orders = db.execute_statement(sql, mapper, params);
-        return orders.getFirst().getOrder_id();
+        Optional<Long> id = db.execute_query(sql, mapper, params).getGeneratedKey();
+        return id.map(Long::intValue).orElse(-1);
     }
 
     public int newOrder(Ordine order) {
@@ -71,7 +72,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public void update(String update_fields, String condition, Object... params) {
         String sql = "UPDATE ORDERS set " + update_fields + condition;
-        db.execute_statement(sql, mapper, params);
+        db.execute_query(sql, mapper, params);
     }
 
     public void updateOrder(int user_id, Date date, int order_id) {
@@ -83,7 +84,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public void delete(String condition, Object... params) {
         String sql = "DELETE FROM ORDERS " + condition;
-        db.execute_statement(sql, mapper, params);
+        db.execute_query(sql, mapper, params);
     }
 
     public void deleteOrder(int order_id) {

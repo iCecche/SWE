@@ -23,12 +23,12 @@ public class ProductDAOImplementation implements ProductDAO {
     @Override
     public List<Prodotto> search() {
         String sql = "select * from PRODUCT";
-        return db.execute_statement(sql, mapper);
+        return db.execute_query(sql, mapper).getResults();
     }
 
     public List<Prodotto> search(String condition, Object... params) {
         String sql = "select * from PRODUCT WHERE " + condition;
-        return db.execute_statement(sql, mapper, params);
+        return db.execute_query(sql, mapper, params).getResults();
     }
 
     public List<Prodotto> searchAll() {
@@ -43,7 +43,7 @@ public class ProductDAOImplementation implements ProductDAO {
     @Override
     public void insert(String name, String description, Integer price, Integer stock_quantity) {
         String sql = "insert into PRODUCT (name, description, price, stock_quantity) values(?,?,?,?)";
-        db.execute_statement(sql, mapper, name, description, price, stock_quantity);
+        db.execute_query(sql, mapper, name, description, price, stock_quantity);
     }
 
     // creazione dinamica delle query
@@ -76,12 +76,12 @@ public class ProductDAOImplementation implements ProductDAO {
 
         sqlBuilder.append(" where id = ?");
         params.add(id);
-        db.execute_statement(sqlBuilder.toString(), mapper, params.toArray());
+        db.execute_query(sqlBuilder.toString(), mapper, params.toArray());
     }
 
     @Override
     public void delete(int id) {
         String sql = "delete from PRODUCT where id = ?";
-        db.execute_statement(sql, mapper, id);
+        db.execute_query(sql, mapper, id);
     }
 }

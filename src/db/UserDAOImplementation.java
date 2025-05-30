@@ -24,13 +24,13 @@ public class UserDAOImplementation implements UserDAO{
     @Override
     public List<User> search() {
         String sql = "SELECT * FROM USERS";
-        return db.execute_statement(sql, mapper);
+        return db.execute_query(sql, mapper).getResults();
     }
 
     public List<User> search(String condition, Object... params) {
         String sql = "SELECT * FROM USERS " +
                 condition;
-        return db.execute_statement(sql, mapper, params);
+        return db.execute_query(sql, mapper, params).getResults();
     }
 
     // public method for user interface
@@ -60,8 +60,7 @@ public class UserDAOImplementation implements UserDAO{
     @Override
     public void insert(String username, String password) {
         String sql = "INSERT INTO USERS (username, password) VALUES(?,?)";
-        List<User> processed_rows = db.execute_statement(sql, mapper, username, password);
-        processed_rows.forEach(User::print);
+        QueryResult<User> processed_rows = db.execute_query(sql, mapper, username, password);
     }
 
     // TODO: scegliere come implementare inserimento custom dei dati (inserisco solo alcuni campi opzionali - telefono, email, ecc. - dinamicamente) -> uso un builder design pattern?
@@ -73,12 +72,12 @@ public class UserDAOImplementation implements UserDAO{
     @Override
     public List<User> update(int id, String username, String password) {
         String sql = "update USERS set username=?,password=? where id=?";
-        return db.execute_statement(sql, mapper, username, password, id);
+        return db.execute_query(sql, mapper, username, password, id).getResults();
     }
 
     public List<User> update(String update_fields, String condition, Object... params) {
         String sql = "UPDATE USER_INFO SET " + update_fields + " WHERE " + condition;
-        return db.execute_statement(sql, mapper, params);
+        return db.execute_query(sql, mapper, params).getResults();
     }
 
     public void UpdateCredentials(int id, String username, String password) {
@@ -98,7 +97,7 @@ public class UserDAOImplementation implements UserDAO{
     @Override
     public List<User> delete(String condition, Object... params) {
         String sql = "delete from USERS where " + condition;
-        return db.execute_statement(sql, mapper, params);
+        return db.execute_query(sql, mapper, params).getResults();
     }
 
     public void deleteUser(int id) {

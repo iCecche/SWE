@@ -148,6 +148,10 @@ public class CartPanel extends JPanel {
             ordine.setDate(date);
 
             int order_id = ordineDAO.newOrder(ordine);
+            if(order_id == -1) {
+                JOptionPane.showMessageDialog(null, "Errore durante la creazione dell'ordine.");
+                return;
+            }
 
             for(int i = 0; i < modelloCart.getRowCount(); i++) {
                 int product_id = (int) modelloCart.getValueAt(i, 0);
