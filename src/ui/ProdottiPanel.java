@@ -118,7 +118,7 @@ public class ProdottiPanel extends JPanel {
             int prezzo = Integer.parseInt(valoriInseriti.get("Prezzo"));
             int quantity = Integer.parseInt(valoriInseriti.get("Quantità"));
 
-            prodottoDAO.update(id, nome, descrizione, prezzo, quantity);
+            prodottoDAO.updateProduct(id, nome, descrizione, prezzo, quantity);
             load_data();
         });
     }
@@ -130,7 +130,7 @@ public class ProdottiPanel extends JPanel {
             return;
         }
         int id = (Integer) modello.getValueAt(selected, 0);
-        prodottoDAO.delete(id);
+        prodottoDAO.deleteProduct(id);
         load_data();
     }
 

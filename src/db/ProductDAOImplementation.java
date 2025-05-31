@@ -10,6 +10,7 @@ public class ProductDAOImplementation implements ProductDAO {
 
     private final DBManager db;
     private final ProductMapper mapper;
+    private QueryBuilder builder;
 
     public ProductDAOImplementation() {
         try {
@@ -21,67 +22,80 @@ public class ProductDAOImplementation implements ProductDAO {
     }
 
     @Override
-    public QueryResult<Prodotto> search() {
-        String sql = "select * from PRODUCT";
-        return db.execute_query(sql, mapper);
-    }
-
-    public QueryResult<Prodotto> search(String condition, Object... params) {
-        String sql = "select * from PRODUCT WHERE " + condition;
+    public QueryResult<Prodotto> search(String sql, Object... params) {
         return db.execute_query(sql, mapper, params);
     }
 
     public List<Prodotto> searchAll() {
-        return search().getResults();
+        builder = QueryBuilder.create();
+        builder.select()
+                .from("PRODUCT");
+
+        String sql = builder.getQuery();
+        return search(sql).getResults();
     }
 
     public Prodotto searchById(int id) {
-        String condition = "id = ?";
-        return search(condition, id).getSingleResult().orElseThrow();
+        builder = QueryBuilder.create();
+        builder.select()
+                .from("PRODUCT")
+                .where("id = ?")
+                .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        return search(sql, params).getSingleResult().orElseThrow();
     }
 
     @Override
-    public void insert(String name, String description, Integer price, Integer stock_quantity) {
-        String sql = "insert into PRODUCT (name, description, price, stock_quantity) values(?,?,?,?)";
-        db.execute_query(sql, mapper, name, description, price, stock_quantity);
+    public void insert(String sql, Object... params) {
+        db.execute_query(sql, mapper, params);
+    }
+
+    public void insertNewProduct(String name, String description, Integer price, Integer stock_quantity) {
+        QueryBuilder builder = QueryBuilder.create();
+        builder.insertInto("PRODUCT", "name", "description", "price", "stock_quantity")
+                .values(name, description, price, stock_quantity);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        insert(sql, params);
     }
 
     // creazione dinamica delle query
     @Override
-    public void update(int id, String name, String description, Integer price, Integer stock) {
-        String sql = "update PRODUCT SET ";
-        StringBuilder sqlBuilder = new StringBuilder(sql);
-        List<Object> params = new ArrayList<>();
+    public void update(String sql, Object... params) {
+        db.execute_query(sql, mapper, params);
+    }
 
-        if(name != null) {
-            sqlBuilder.append("name = ?, ");
-            params.add(name);
-        }
-        if (description != null) {
-            sqlBuilder.append("description = ?, ");
-            params.add(description);
-        }
-        if (price != null) {
-            sqlBuilder.append("price = ?, ");
-            params.add(price);
-        }
-        if (stock != null) {
-            sqlBuilder.append("stock_quantity = ?");
-            params.add(stock);
-        }
+    public void updateProduct(int id, String name, String description, Integer price, Integer stock) {
+        builder = QueryBuilder.create();
+        builder.update("PRODUCT")
+                .set("name", name)
+                .set("description", description)
+                .set("price", price)
+                .set("stock_quantity", stock)
+                .where("id = ?")
+                .addParameter(id);
 
-        if(params.isEmpty()) {
-            throw new IllegalArgumentException("Nothing to update!");
-        }
-
-        sqlBuilder.append(" where id = ?");
-        params.add(id);
-        db.execute_query(sqlBuilder.toString(), mapper, params.toArray());
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        update(sql, params);
     }
 
     @Override
-    public void delete(int id) {
-        String sql = "delete from PRODUCT where id = ?";
-        db.execute_query(sql, mapper, id);
+    public void delete(String sql, Object... params) {
+        db.execute_query(sql, mapper, params);
+    }
+
+    public void deleteProduct(int id) {
+        builder = QueryBuilder.create();
+        builder.deleteFrom("PRODUCT")
+                .where("id = ?")
+                .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        delete(sql, params);
     }
 }

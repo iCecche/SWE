@@ -161,12 +161,12 @@ public class UserDAOImplementation implements UserDAO{
     public void UpdateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
         builder = QueryBuilder.create();
         builder.update("USER_INFO")
-                .set(nome, nome)
-                .set(cognome, cognome)
-                .set(indirizzo, indirizzo)
-                .set(cap, cap)
-                .set(provincia, provincia)
-                .set(stato, stato)
+                .set("nome", nome)
+                .set("cognome", cognome)
+                .set("indirizzo", indirizzo)
+                .set("cap", cap)
+                .set("provincia", provincia)
+                .set("stato", stato)
                 .where("id = ?")
                 .addParameter(id);
 

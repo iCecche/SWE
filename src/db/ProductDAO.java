@@ -5,11 +5,11 @@ import java.util.List;
 
 public interface ProductDAO {
 
-    abstract QueryResult<Prodotto> search();
+    QueryResult<Prodotto> search(String sql, Object... params);
 
-    abstract void insert(String name, String description, Integer price, Integer stock_quantity);
+    void insert(String sql, Object... params);
 
-    abstract void update(int id, String name, String description, Integer price, Integer stock);
+    void update(String sql, Object... params);
 
-    abstract void delete(int id);
+    void delete(String sql, Object... params);
 }
