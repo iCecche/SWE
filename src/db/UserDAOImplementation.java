@@ -91,28 +91,23 @@ public class UserDAOImplementation implements UserDAO{
     }
 
     @Override
-    public List<User> update(int id, String username, String password) {
-        String sql = "update USERS set username=?,password=? where id=?";
-        return db.execute_query(sql, mapper, username, password, id).getResults();
-    }
-
-    public List<User> update(String update_fields, String condition, Object... params) {
-        String sql = "UPDATE USER_INFO SET " + update_fields + " WHERE " + condition;
-        return db.execute_query(sql, mapper, params).getResults();
+    public User update(String table, String update_fields, String condition, Object... params) {
+        String sql = "UPDATE  " + table + " SET " + update_fields + " WHERE " + condition;
+        return db.execute_query(sql, mapper, params).getSingleResult().orElse(null);
     }
 
     public void UpdateCredentials(int id, String username, String password) {
         String condition = "id = ?";
         String update_fields = "username = ?, password = ?";
-        List<User> processed_rows = update(update_fields, condition, username, password, id);
-
-        processed_rows.forEach(User::print); // CLI result view
+        String table = "USERS";
+        update(table, update_fields, condition, username, password, id);
     }
 
     public void UpdateRole(int id, UserRole role) {
         String condition = "id = ?";
         String update_fields = "role = ?::user_role";
-        update(update_fields, condition, role.toString(), id);
+        String table = "USERS";
+        update(table, update_fields, condition, role.toString(), id);
     }
 
     public void UpdateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {

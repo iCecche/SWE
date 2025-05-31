@@ -10,7 +10,7 @@ public interface UserDAO{
     QueryResult<User> search();
     void insert(String username, String password, UserRole role, String nome, String cognome);
 
-    List<User> update(int id, String username, String password);
+    User update(String table, String update_fields, String condition, Object... params);
 
     List<User> delete(String condition, Object... params);
 

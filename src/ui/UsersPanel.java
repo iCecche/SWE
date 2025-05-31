@@ -164,7 +164,26 @@ public class UsersPanel extends JPanel {
     }
 
     private void roleButtonCallback(ActionEvent e) {
+        int selected = tabella.getSelectedRow();
+        if(selected == -1) {
+            JOptionPane.showMessageDialog(null, "Seleziona un utente.");
+            return;
+        }
+        int id = Integer.parseInt(tabella.getValueAt(selected, 0).toString());
+        User user = userDAO.searchUserInfoById(id);
+        if(user == null) {
+            JOptionPane.showMessageDialog(null, "Utente non trovato.");
+            return;
+        }
 
+        UserRole role = user.getRole();
+        if(role == UserRole.ADMIN) {
+            role = UserRole.USER;
+        }else {
+            role = UserRole.ADMIN;
+        }
+
+        userDAO.UpdateRole(id, role);
     }
 
     private void setContent(Component comp, Container parent) {
