@@ -1,8 +1,6 @@
 package db;
 
-import model.DettaglioOrdine;
 import model.Ordine;
-import java.util.List;
 
 public interface OrdineDAO {
 

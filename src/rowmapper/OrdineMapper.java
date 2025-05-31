@@ -1,17 +1,13 @@
 package rowmapper;
 
-import model.OrdineBuilder;
-import model.Ordine;
-import model.DettaglioOrdine;
-import model.DeliveryStatus;
-import model.PaymentStatus;
+import model.*;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.sql.SQLException;
 
 public class OrdineMapper extends RowMapper<Ordine> {
     private final Map<Integer, Ordine> ordiniMap = new HashMap<>();

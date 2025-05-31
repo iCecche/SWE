@@ -5,7 +5,6 @@ import model.UserBuilder;
 import model.UserRole;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public class UserMapper extends RowMapper<User> {

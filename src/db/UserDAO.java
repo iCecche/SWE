@@ -3,8 +3,6 @@ package db;
 import model.User;
 import model.UserRole;
 
-import java.util.List;
-
 public interface UserDAO{
 
     QueryResult<User> search(String sql, Object... params);

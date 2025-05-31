@@ -1,7 +1,6 @@
 package db;
 
 import model.Prodotto;
-import java.util.List;
 
 public interface ProductDAO {
 

@@ -1,7 +1,8 @@
 package db;
-import model.Ordine;
-import model.DettaglioOrdine;
+
 import model.DeliveryStatus;
+import model.DettaglioOrdine;
+import model.Ordine;
 import model.PaymentStatus;
 import rowmapper.OrdineMapper;
 

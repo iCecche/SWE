@@ -2,8 +2,8 @@ package db;
 
 import model.Prodotto;
 import rowmapper.ProductMapper;
+
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDAOImplementation implements ProductDAO {

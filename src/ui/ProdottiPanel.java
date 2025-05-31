@@ -1,5 +1,8 @@
 package ui;
 
+import db.ProductDAOImplementation;
+import model.Prodotto;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -7,9 +10,6 @@ import java.awt.event.ActionEvent;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import db.ProductDAOImplementation;
-import model.Prodotto;
 
 public class ProdottiPanel extends JPanel {
 

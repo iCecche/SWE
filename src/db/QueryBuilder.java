@@ -2,7 +2,9 @@ package db;
 
 import model.QueryType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 public class QueryBuilder {
 
