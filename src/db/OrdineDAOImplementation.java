@@ -1,8 +1,7 @@
 package db;
-
-import model.DeliveryStatus;
-import model.DettaglioOrdine;
 import model.Ordine;
+import model.DettaglioOrdine;
+import model.DeliveryStatus;
 import model.PaymentStatus;
 import rowmapper.OrdineMapper;
 
@@ -107,7 +106,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
         String sql = builder.getQuery();
         Object[] params = builder.getParameters();
 
-        QueryResult<Ordine> order_status_result = db.execute_query(sql, mapper, order_id, params);
+        QueryResult<Ordine> order_status_result = db.execute_query(sql, mapper, params);
 
         if(order_status_result.getGeneratedKey().isEmpty()) {
             throw new RuntimeException("Error inserting order status!");

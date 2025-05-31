@@ -5,6 +5,7 @@ import db.ProductDAOImplementation;
 import model.*;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,337 +17,254 @@ import java.util.Map;
 
 public class OrdiniPanel extends JPanel {
 
-    private Map<Integer, Ordine> ordineMap;
+    private static final String[] ADMIN_COLUMNS = {"Order ID", "User ID", "Date", "Delivery Status", "Payment Status"};
+    private static final String[] USER_COLUMNS = {"Order ID", "Date", "Delivery Status", "Payment Status"};
+    private static final String[] DETAIL_COLUMNS = {"Product ID", "Nome", "Descrizione", "Prezzo", "Quantity"};
+
+    private final Map<Integer, Ordine> ordineMap = new HashMap<>();
     private JPanel panelBottoni;
-    private final JTable dettaglioTable, orderTable;
-    private final DefaultTableModel modelloDettaglio, modelloOrdine;
+    private final JTable dettaglioTable;
+    private final JTable orderTable;
+    private final DefaultTableModel modelloDettaglio;
+    private final DefaultTableModel modelloOrdine;
     private final OrdineDAOImplementation ordineDAO;
-    private ProductDAOImplementation prodottoDAO;
-    private Integer userId;
+    private final ProductDAOImplementation prodottoDAO;
+    private final Integer userId;
 
     public OrdiniPanel() {
-        setSize(800, 500);
-        setLayout(new BorderLayout());
-
-        modelloOrdine = new DefaultTableModel(new Object[]{"Order ID", "User ID", "Date", "Delivery Status", "Payment Status"}, 0 ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            };
-        };
-
-        modelloDettaglio = new DefaultTableModel(new Object[]{"Product ID", "Nome", "Descrizione", "Prezzo", "Quantity"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            };
-        };
-
-        orderTable = new JTable(modelloOrdine);
-        dettaglioTable = new JTable(modelloDettaglio);
-
-        orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        orderTable.getSelectionModel().addListSelectionListener(e -> {
-            if (e.getValueIsAdjusting()) {
-                return;
-            }
-
-            int row = orderTable.getSelectedRow();
-            if (row == -1) {
-                return;
-            }
-
-            int orderId = Integer.parseInt(orderTable.getValueAt(row, 0).toString()); // TODO: use this style everywhere
-
-            modelloDettaglio.setRowCount(0);
-            Ordine ordine = ordineMap.get(orderId);
-            if(ordine != null) {
-                for (DettaglioOrdine detail : ordine.getDetails()) {
-                    int id = detail.getProduct_id();
-                    Prodotto prodotto = prodottoDAO.searchById(id);
-                    modelloDettaglio.addRow(new Object[]{
-                            prodotto.getId(), prodotto.getName(), prodotto.getDescription(),  prodotto.getPrice(), detail.getQuantity()
-                    });
-                }
-            }
-        });
-
-        orderTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-                    int row = orderTable.rowAtPoint(e.getPoint());
-                    int col = orderTable.columnAtPoint(e.getPoint());
-
-                    UserIdCellCallback(row, col);
-                }
-            }
-        });
-
-        JScrollPane scrollPane1 = new JScrollPane(orderTable);
-        JScrollPane scrollPane2 = new JScrollPane(dettaglioTable);
-
-        JPanel splitPane = new JPanel(new GridLayout(1, 2, 0, 0)); // 1 row, 2 columns, 10px horizontal gap
-        splitPane.add(scrollPane1);
-        splitPane.add(scrollPane2);
-
-        JPanel container = new JPanel(new BorderLayout());
-        container.add(splitPane, BorderLayout.CENTER);
-
-        createAdminButtons();
-
-        container.setVisible(true);
-        add(container, BorderLayout.CENTER);
-
-        prodottoDAO = new ProductDAOImplementation();
-        ordineDAO = new OrdineDAOImplementation();
-        ordineMap = new HashMap<>();
-        load_data();
+        this(null);
     }
 
-    public OrdiniPanel(int userId) {
+    public OrdiniPanel(Integer userId) {
         this.userId = userId;
-        setSize(800, 500);
-        setLayout(new BorderLayout());
+        this.ordineDAO = new OrdineDAOImplementation();
+        this.prodottoDAO = new ProductDAOImplementation();
 
-        modelloOrdine = new DefaultTableModel(new Object[]{"Order ID", "Date", "Delivery Status", "Payment Status"}, 0 ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            };
-        };
+        configurePanelLayout();
 
-        modelloDettaglio = new DefaultTableModel(new Object[]{"Product ID", "Nome", "Descrizione", "Prezzo", "Quantity"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            };
-        };
+        modelloOrdine = createTableModel(isAdminView() ? ADMIN_COLUMNS : USER_COLUMNS);
+        modelloDettaglio = createTableModel(DETAIL_COLUMNS);
 
-        orderTable = new JTable(modelloOrdine);
+        orderTable = createOrderTable();
         dettaglioTable = new JTable(modelloDettaglio);
 
-        // Configura la selezione della tabella ordini
-        orderTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        orderTable.getSelectionModel().addListSelectionListener(e -> {
-            if (e.getValueIsAdjusting()) {
-                return;
-            }
+        setupTableLayout();
+        setupButtons();
+        loadData();
+    }
 
-            int row = orderTable.getSelectedRow();
-            if (row == -1) {
-                return;
-            }
-            int orderId = Integer.parseInt(orderTable.getValueAt(row, 0).toString()); // TODO: use this style everywhere
+    private boolean isAdminView() {
+        return userId == null;
+    }
 
-            modelloDettaglio.setRowCount(0);
-            Ordine ordine = ordineMap.get(orderId);
-            if(ordine != null) {
-                for (DettaglioOrdine detail : ordine.getDetails()) {
-                    int id = detail.getProduct_id();
-                    Prodotto prodotto = prodottoDAO.searchById(id);
-                    modelloDettaglio.addRow(new Object[]{
-                            prodotto.getId(), prodotto.getName(), prodotto.getDescription(),  prodotto.getPrice(), detail.getQuantity()
-                    });
+    private DefaultTableModel createTableModel(String[] columns) {
+        return new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+    }
+
+    private JTable createOrderTable() {
+        JTable table = new JTable(modelloOrdine);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.getSelectionModel().addListSelectionListener(e -> handleOrderSelection(e, table));
+
+        if (isAdminView()) {
+            table.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
+                        handleUserIdDoubleClick(table, e);
+                    }
                 }
-            }
-        });
+            });
+        }
 
-        JScrollPane scrollPane1 = new JScrollPane(orderTable);
-        JScrollPane scrollPane2 = new JScrollPane(dettaglioTable);
+        return table;
+    }
 
-        JPanel splitPane = new JPanel(new GridLayout(1, 2, 0, 0)); // 1 row, 2 columns, 10px horizontal gap
-        splitPane.add(scrollPane1);
-        splitPane.add(scrollPane2);
+    private void handleOrderSelection(ListSelectionEvent e, JTable table) {
+        if (e.getValueIsAdjusting() || table.getSelectedRow() == -1) {
+            return;
+        }
+
+        updateDetailTable(getSelectedOrderId(table));
+    }
+
+    private void updateDetailTable(int orderId) {
+        modelloDettaglio.setRowCount(0);
+        Ordine ordine = ordineMap.get(orderId);
+
+        if (ordine != null) {
+            ordine.getDetails().forEach(detail -> {
+                Prodotto prodotto = prodottoDAO.searchById(detail.getProduct_id());
+                modelloDettaglio.addRow(new Object[]{
+                        prodotto.getId(), prodotto.getName(),
+                        prodotto.getDescription(), prodotto.getPrice(),
+                        detail.getQuantity()
+                });
+            });
+        }
+    }
+
+    private void setupTableLayout() {
+        JPanel splitPane = new JPanel(new GridLayout(1, 2, 0, 0));
+        splitPane.add(new JScrollPane(orderTable));
+        splitPane.add(new JScrollPane(dettaglioTable));
 
         JPanel container = new JPanel(new BorderLayout());
         container.add(splitPane, BorderLayout.CENTER);
-
-        createUserButtons();
-
-        container.setVisible(true);
         add(container, BorderLayout.CENTER);
-
-        prodottoDAO = new ProductDAOImplementation();
-        ordineDAO = new OrdineDAOImplementation();
-        ordineMap = new HashMap<>();
-        load_data(userId);
     }
 
-    /*
-
-    private DefaultTableModel createTableModel(Object[] table_model) {
-        return new DefaultTableModel(table_model, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // solo la terza colonna è modificabile
-            };
-        };
-
+    private void setupButtons() {
+        panelBottoni = new JPanel();
+        if (isAdminView()) {
+            createAdminButtons();
+        } else {
+            createUserButtons();
+        }
+        add(panelBottoni, BorderLayout.SOUTH);
     }
 
-    private JTable createTable(Object[] table_model) {
-        modello = createTableModel(table_model);
-        tabella = new JTable(modello);
+    private void loadData() {
+        modelloOrdine.setRowCount(0);
+        modelloDettaglio.setRowCount(0);
 
-        tabella.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
-                    int row = tabella.rowAtPoint(e.getPoint());
-                    int col = tabella.columnAtPoint(e.getPoint());
+        List<Ordine> ordini = isAdminView() ?
+                ordineDAO.searchAll() :
+                ordineDAO.searchByUserID(userId);
 
-                    UserIdCellCallback(row, col);
-                    ProdottoIdCellCallback(row, col);
-                }
-            }
-        });
-        return tabella;
+        ordini.forEach(this::addOrderToTable);
     }
-*/
-    private void UserIdCellCallback(int row, int col) {
-        orderTable.convertColumnIndexToModel(col);
-        if (orderTable.getColumnName(col).equals("User ID")) {
-            Object value = orderTable.getValueAt(row, col);
+
+    private void addOrderToTable(Ordine ordine) {
+        Object[] rowData = isAdminView() ?
+                new Object[]{ordine.getOrder_id(), ordine.getUser_id(),
+                        ordine.getDate(), ordine.getDelivery_status(),
+                        ordine.getPayment_status()} :
+                new Object[]{ordine.getOrder_id(), ordine.getDate(),
+                        ordine.getDelivery_status(), ordine.getPayment_status()};
+
+        modelloOrdine.addRow(rowData);
+        ordineMap.put(ordine.getOrder_id(), ordine);
+    }
+
+    private void configurePanelLayout() {
+        setSize(800, 500);
+        setLayout(new BorderLayout());
+    }
+
+    private void handleUserIdDoubleClick(JTable table, MouseEvent e) {
+        int row = table.rowAtPoint(e.getPoint());
+        int col = table.columnAtPoint(e.getPoint());
+
+        if (table.getColumnName(col).equals("User ID")) {
+            Object value = table.getValueAt(row, col);
             if (value != null) {
                 int userId = Integer.parseInt(value.toString());
-
-                // Esegui query per quel userId
-                System.out.println("Hai cliccato sull'user_id: " + userId);
-
-                // Esempio: apri un nuovo pannello o aggiorna la tabella
                 mostraDettagliUtente(userId, getParent());
             }
         }
     }
 
-    private void createAdminButtons() {
-        // Pulsanti
-        panelBottoni = new JPanel();
+    private int getSelectedOrderId(JTable table) {
+        return Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString());
+    }
 
+    private void createAdminButtons() {
         JButton btnAggiungi = new JButton("Aggiungi");
         JButton btnElimina = new JButton("Elimina");
         JButton btnSpedisci = new JButton("Spedisci");
 
+        btnAggiungi.addActionListener(this::handleAdminAdd);
+        btnElimina.addActionListener(this::handleDelete);
+        btnSpedisci.addActionListener(this::handleShip);
+
         panelBottoni.add(btnAggiungi);
         panelBottoni.add(btnElimina);
         panelBottoni.add(btnSpedisci);
-
-        btnAggiungi.addActionListener(this::adminAddButtonCallback);
-        btnElimina.addActionListener(this::deleteButtonCallback);
-        btnSpedisci.addActionListener(this::shipButtonCallback);
-
-        add(panelBottoni, BorderLayout.SOUTH);
     }
 
     private void createUserButtons() {
-        panelBottoni = new JPanel();
         JButton btnAggiungi = new JButton("Aggiungi");
         JButton btnPaga = new JButton("Paga");
 
+        btnAggiungi.addActionListener(this::handleUserAdd);
+        btnPaga.addActionListener(this::handlePayment);
+
         panelBottoni.add(btnAggiungi);
         panelBottoni.add(btnPaga);
-
-        btnAggiungi.addActionListener(this::userAddButtonCallback);
-        btnPaga.addActionListener(this::pagaButtonCallback);
-
-        add(panelBottoni, BorderLayout.SOUTH);
     }
 
-    private void adminAddButtonCallback(ActionEvent e) {
-        Container parent = getParent();
-        mostraUserSelection(parent);
+    private void handleAdminAdd(ActionEvent e) {
+        mostraUserSelection(getParent());
     }
 
-    private void userAddButtonCallback(ActionEvent e) {
-        Container parent = getParent();
-        mostraCarrello(userId, parent, false);
+    private void handleUserAdd(ActionEvent e) {
+        mostraCarrello(userId, getParent(), false);
     }
 
-    private void deleteButtonCallback(ActionEvent e) {
+    private void handleDelete(ActionEvent e) {
         int selectedRow = orderTable.getSelectedRow();
-        if(selectedRow == -1 ) {
-            JOptionPane.showMessageDialog(null, "Seleziona un ordine.");
+        if (selectedRow == -1) {
+            mostraErrore("Seleziona un ordine.");
             return;
         }
 
-        int id = (int) orderTable.getValueAt(selectedRow, 0);
-        ordineDAO.deleteOrder(id);
-        load_data();
+        int orderId = getSelectedOrderId(orderTable);
+        ordineDAO.deleteOrder(orderId);
+        loadData();
     }
 
-    private void pagaButtonCallback(ActionEvent e) {
+    private void handlePayment(ActionEvent e) {
         int selectedRow = orderTable.getSelectedRow();
-        if(selectedRow == -1 ) {
-            JOptionPane.showMessageDialog(null, "Seleziona un ordine.");
+        if (selectedRow == -1) {
+            mostraErrore("Seleziona un ordine.");
             return;
         }
 
-        int payment_status_col = orderTable.getColumn("Payment Status").getModelIndex();
+        int paymentStatusCol = orderTable.getColumn("Payment Status").getModelIndex();
+        String paymentStatus = (String) orderTable.getValueAt(selectedRow, paymentStatusCol);
 
-        String paymentStatus = (String) orderTable.getValueAt(selectedRow, payment_status_col);
-        PaymentStatus status = PaymentStatus.fromString(paymentStatus);
-
-        if(status == PaymentStatus.PAID) {
-            JOptionPane.showMessageDialog(null, "L'ordine è già stato pagato.");
+        if (PaymentStatus.fromString(paymentStatus) == PaymentStatus.PAID) {
+            mostraErrore("L'ordine è già stato pagato.");
             return;
         }
 
-        int order_id = (int) orderTable.getValueAt(selectedRow, 0); //FIXME: style
-        ordineDAO.updatePaymentStatus(order_id, PaymentStatus.PAID);
-
+        int orderId = getSelectedOrderId(orderTable);
+        ordineDAO.updatePaymentStatus(orderId, PaymentStatus.PAID);
         System.out.println("L'ordine pagato con successo.");
-        load_data(userId);
+        loadData();
     }
 
-    private void shipButtonCallback(ActionEvent e) {
+    private void handleShip(ActionEvent e) {
         int selectedRow = orderTable.getSelectedRow();
-        if(selectedRow == -1 ) {
-            JOptionPane.showMessageDialog(null, "Seleziona un ordine.");
+        if (selectedRow == -1) {
+            mostraErrore("Seleziona un ordine.");
             return;
         }
 
-        int order_status_col = orderTable.getColumn("Delivery Status").getModelIndex();
+        int deliveryStatusCol = orderTable.getColumn("Delivery Status").getModelIndex();
+        String deliveryStatus = (String) orderTable.getValueAt(selectedRow, deliveryStatusCol);
+        DeliveryStatus status = DeliveryStatus.fromString(deliveryStatus);
 
-        String order_status = (String) modelloOrdine.getValueAt(selectedRow, order_status_col); //fixme: style
-        DeliveryStatus status = DeliveryStatus.fromString(order_status);
-
-        if(status == DeliveryStatus.SHIPPED || status == DeliveryStatus.DELIVERED) {
-            JOptionPane.showMessageDialog(null, "L'ordine è già stato gestito.");
+        if (status == DeliveryStatus.SHIPPED || status == DeliveryStatus.DELIVERED) {
+            mostraErrore("L'ordine è già stato gestito.");
             return;
         }
 
-        int order_id = (int) modelloOrdine.getValueAt(selectedRow, 0);
-        ordineDAO.updateDeliveryStatus(order_id, DeliveryStatus.SHIPPED);
-
+        int orderId = getSelectedOrderId(orderTable);
+        ordineDAO.updateDeliveryStatus(orderId, DeliveryStatus.SHIPPED);
         System.out.println("L'ordine è stato gestito con successo.");
-        load_data();
+        loadData();
     }
 
-    private void load_data() {
-        modelloOrdine.setRowCount(0);
-        modelloDettaglio.setRowCount(0);
-        List<Ordine> listaOrdini = ordineDAO.searchAll();
-        for (Ordine ordine : listaOrdini) {
-            modelloOrdine.addRow(new Object[]{
-                    ordine.getOrder_id(), ordine.getUser_id(), ordine.getDate(), ordine.getDelivery_status(), ordine.getPayment_status()
-            });
-            ordineMap.put(ordine.getOrder_id(), ordine);
-        }
+    private void mostraErrore(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio);
     }
-
-    private void load_data(int userId) {
-        modelloOrdine.setRowCount(0);
-        modelloDettaglio.setRowCount(0);
-        List<Ordine> listaOrdini = ordineDAO.searchByUserID(userId);
-        for (Ordine ordine : listaOrdini) {
-            modelloOrdine.addRow(new Object[]{
-                    ordine.getOrder_id(), ordine.getDate(), ordine.getDelivery_status(), ordine.getPayment_status()
-            });
-            ordineMap.put(ordine.getOrder_id(), ordine);
-        }
-    }
-
 
     public void mostraDettagliUtente(int userId, Container parent) {
         setContent(new UsersPanel(userId), parent);

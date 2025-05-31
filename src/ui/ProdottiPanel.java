@@ -80,7 +80,7 @@ public class ProdottiPanel extends JPanel {
             int prezzo = Integer.parseInt(valoriInseriti.get("Prezzo"));
             int quantity = Integer.parseInt(valoriInseriti.get("Quantità"));
 
-            prodottoDAO.insert(nome, descrizione, prezzo, quantity);
+            prodottoDAO.insertNewProduct(nome, descrizione, prezzo, quantity);
             load_data();
         });
     }

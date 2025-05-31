@@ -35,7 +35,6 @@ public class UserDAOImplementation implements UserDAO{
                .from("USERS");
 
         String sql = builder.getQuery();
-
         return search(sql).getResults();
     }
 
