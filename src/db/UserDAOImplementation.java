@@ -11,6 +11,7 @@ import java.util.Optional;
 public class UserDAOImplementation implements UserDAO{
     private final DBManager db;
     private final UserMapper mapper;
+    private QueryBuilder builder;
 
     public UserDAOImplementation() {
         try {
@@ -24,39 +25,66 @@ public class UserDAOImplementation implements UserDAO{
     // CRUD OPERATIONS
     // TODO: choose interface or abstract class, implemented search methods must be private (searchAll... only accessible methods)
     @Override
-    public QueryResult<User> search() {
-        String sql = "SELECT * FROM USERS";
-        return db.execute_query(sql, mapper);
-    }
-
-    public QueryResult<User> search(String condition, Object... params) {
-        String sql = "SELECT * FROM USERS " +
-                condition;
+    public QueryResult<User> search(String sql, Object... params) {
         return db.execute_query(sql, mapper, params);
     }
 
     // public method for user interface
     public List<User> searchAll() {
-        return search().getResults();
+        builder = QueryBuilder.create();
+        builder.select()
+               .from("USERS");
+
+        String sql = builder.getQuery();
+
+        return search(sql).getResults();
     }
 
     public User searchById(int id) {
-        return search("WHERE id = ?", id).getSingleResult().orElse(null);
+        builder = QueryBuilder.create();
+        builder.select()
+               .from("USERS")
+               .where("id = ?")
+               .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        return search(sql, params).getSingleResult().orElse(null);
     }
 
     public User searchByUsername(String username) {
-        username = username.toLowerCase();
-        return search("WHERE username = ?", username).getSingleResult().orElse(null);
+        builder = QueryBuilder.create();
+        builder.select()
+               .from("USERS")
+               .where("username = ?")
+               .addParameter(username.toLowerCase());
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        return search(sql, params).getSingleResult().orElse(null);
     }
 
     public List<User> searchUsersInfo() {
-        String condition = "LEFT JOIN USER_INFO ON USERS.id = USER_INFO.ID";
-        return search(condition).getResults();
+        builder = QueryBuilder.create();
+        builder.select()
+               .from("USERS")
+               .leftJoin("USER_INFO", "USERS.id = USER_INFO.ID");
+
+        String sql = builder.getQuery();
+        return search(sql).getResults();
     }
 
     public User searchUserInfoById(int id) {
-        String condition = "LEFT JOIN USER_INFO ON USERS.id = USER_INFO.ID where USERS.ID = ?";
-        return search(condition, id).getSingleResult().orElse(null);
+        builder = QueryBuilder.create();
+        builder.select()
+               .from("USERS")
+               .leftJoin("USER_INFO", "USERS.id = USER_INFO.ID")
+               .where("id = ?")
+               .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        return search(sql, params).getSingleResult().orElse(null);
     }
 
     @Override
@@ -69,9 +97,15 @@ public class UserDAOImplementation implements UserDAO{
     }
 
     private Long insertUser(String username, String password, UserRole role) {
-        String sql1 = "INSERT INTO USERS (username, password, role) VALUES (?, ?, ?::user_role)";
-        QueryResult<User> result = db.execute_query(sql1, mapper, username, password, role.toString());
+        builder = QueryBuilder.create();
+        builder.insertInto("USERS", "username", "password", "role")
+                .withEnumColumn("role", "role_type")
+                .values(username, password, role.toString());
 
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+
+        QueryResult<User> result = db.execute_query(sql, mapper, params);
         Long userId = result.getGeneratedKey().orElse(null);
 
         if(userId == null) {
@@ -82,49 +116,78 @@ public class UserDAOImplementation implements UserDAO{
     }
 
     private void insertUserInfo(Long userId, String nome, String cognome) {
-        String sql2 = "INSERT INTO USER_INFO (id, nome, cognome) VALUES (?, ?, ?)";
-        QueryResult<User> result = db.execute_query(sql2, mapper, userId, nome, cognome);
+        builder = QueryBuilder.create();
+        builder.insertInto("USER_INFO", "id", "nome", "cognome")
+               .values(userId, nome, cognome);
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
 
+        QueryResult<User> result = db.execute_query(sql, mapper, params);
         if(result.getGeneratedKey().isEmpty()) {
             throw new RuntimeException("Error inserting user info!");
         }
     }
 
     @Override
-    public User update(String table, String update_fields, String condition, Object... params) {
-        String sql = "UPDATE  " + table + " SET " + update_fields + " WHERE " + condition;
-        return db.execute_query(sql, mapper, params).getSingleResult().orElse(null);
+    public QueryResult<User> update(String sql, Object... params) {
+        return db.execute_query(sql, mapper, params);
     }
 
     public void UpdateCredentials(int id, String username, String password) {
-        String condition = "id = ?";
-        String update_fields = "username = ?, password = ?";
-        String table = "USERS";
-        update(table, update_fields, condition, username, password, id);
+        builder = QueryBuilder.create();
+        builder.update("USERS")
+               .set("username", username)
+               .set("password", password)
+               .where("id = ?")
+               .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        update(sql, params);
     }
 
     public void UpdateRole(int id, UserRole role) {
-        String condition = "id = ?";
-        String update_fields = "role = ?::user_role";
-        String table = "USERS";
-        update(table, update_fields, condition, role.toString(), id);
+        builder = QueryBuilder.create();
+        builder.update("USERS")
+               .set("role", role.toString(), true)
+               .where("id = ?")
+               .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        update(sql, params);
     }
 
     public void UpdateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
-        String condition = "id = ?";
-        String update_fields = "nome = ?, cognome = ?, indirizzo = ?, cap = ?, provincia = ?, stato = ? ";
-        update(update_fields, condition, nome, cognome, indirizzo, cap, provincia, stato, id);
+        builder = QueryBuilder.create();
+        builder.update("USER_INFO")
+                .set(nome, nome)
+                .set(cognome, cognome)
+                .set(indirizzo, indirizzo)
+                .set(cap, cap)
+                .set(provincia, provincia)
+                .set(stato, stato)
+                .where("id = ?")
+                .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        update(sql, params);
     }
 
     @Override
-    public List<User> delete(String condition, Object... params) {
-        String sql = "delete from USERS where " + condition;
-        return db.execute_query(sql, mapper, params).getResults();
+    public QueryResult<User> delete(String sql, Object... params) {
+        return db.execute_query(sql, mapper, params);
     }
 
     public void deleteUser(int id) {
-        String condition = "id = ?";
-        List<User> processed_rows = delete(condition, id);
-        processed_rows.forEach(User::print);
+        builder = QueryBuilder.create();
+        builder.deleteFrom("USERS")
+                .where("id = ?")
+                .addParameter(id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        delete(sql, params);
     }
 }
