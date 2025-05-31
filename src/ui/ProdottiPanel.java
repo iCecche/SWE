@@ -13,38 +13,28 @@ import java.util.Map;
 
 public class ProdottiPanel extends JPanel {
 
+    private final boolean isAdmin;
     private JPanel panelBottoni;
     private JTable tabella;
     private DefaultTableModel modello;
     private ProductDAOImplementation prodottoDAO;
 
     public ProdottiPanel(boolean isAdmin) {
-        setUpPanel();
-        load_data();
+        this.isAdmin = isAdmin;
+        this.prodottoDAO = new ProductDAOImplementation();
 
-        if(!isAdmin)
-            panelBottoni.setVisible(false);
-    }
+        configurePanelLayout();
 
-    public ProdottiPanel(int prodottoId) {
-        setUpPanel();
-        load_data(prodottoId);
-        panelBottoni.setVisible(false);
-    }
-
-    private void setUpPanel() {
-        setSize(800, 500);
-        setLayout(new BorderLayout());
-
-        // Tabella
-        modello = new DefaultTableModel(new Object[]{"ID", "Nome", "Descrizione", "Prezzo", "Stock"}, 0);
+        modello = createTableModel(new String[]{"ID", "Nome", "Descrizione", "Prezzo", "Stock"});
         tabella = new JTable(modello);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
-        createButtons();
-        add(panelBottoni, BorderLayout.SOUTH);
+        setupButtons();
+        loadData();
+    }
 
-        prodottoDAO = new ProductDAOImplementation();
+    private boolean isAdminView() {
+        return isAdmin;
     }
 
     private void createButtons() {
@@ -60,97 +50,123 @@ public class ProdottiPanel extends JPanel {
         panelBottoni.add(btnElimina);
 
         // Eventi
-        btnAggiungi.addActionListener(this::addButtonCollback);
-        btnModifica.addActionListener(this::modifyButtonCollback);
-        btnElimina.addActionListener(this::deleteButtonCollback);
+        btnAggiungi.addActionListener(this::onAdd);
+        btnModifica.addActionListener(this::onModify);
+        btnElimina.addActionListener(this::onDelete);
     }
 
-    private void addButtonCollback(ActionEvent e) {
-        Map<String, Object> campi = new LinkedHashMap<>();
-        campi.put("Nome", "Nome del prodotto...");
-        campi.put("Descrizione", "Descrizione del prodotto...");
-        campi.put("Prezzo", "Prezzo del prodotto...");
-        campi.put("Quantità", "Quantitò del prodotto...");
+    private void onAdd(ActionEvent e) {
+        Map<String, Object> campi = getCampiDialog(null);
 
-        // Mostra dialog dinamico
-        new Dialog(null,"Modifica Prodotto", campi, valoriInseriti -> {
-            // Aggiornamento del prodotto
-            String nome = valoriInseriti.get("Nome");
-            String descrizione = valoriInseriti.get("Descrizione");
-            int prezzo = Integer.parseInt(valoriInseriti.get("Prezzo"));
-            int quantity = Integer.parseInt(valoriInseriti.get("Quantità"));
-
-            prodottoDAO.insertNewProduct(nome, descrizione, prezzo, quantity);
-            load_data();
+        new Dialog(null, "Aggiungi Prodotto", campi, valoriInseriti -> {
+            Prodotto nuovoProdotto = getProdottoFromInput(valoriInseriti);
+            prodottoDAO.insertNewProduct(
+                    nuovoProdotto.getName(),
+                    nuovoProdotto.getDescription(),
+                    nuovoProdotto.getPrice(),
+                    nuovoProdotto.getStock()
+            );
+            loadData();
         });
     }
 
-    private void modifyButtonCollback(ActionEvent e) {
+    private void onModify(ActionEvent e) {
         int selected = tabella.getSelectedRow();
         if (selected == -1) {
-            JOptionPane.showMessageDialog(null, "Seleziona un prodotto.");
+            mostraErrore("Seleziona un prodotto.");
             return;
         }
 
-        // Recupero ID prodotto selezionato
-        int id = (Integer) modello.getValueAt(selected, 0);
-
-        // Recupero prodotto dal DB
+        int id = getSelectedOrderId();
         Prodotto prod = prodottoDAO.searchById(id);
 
         if (prod == null) {
-            JOptionPane.showMessageDialog(null, "Prodotto non trovato.");
+            mostraErrore("Prodotto non trovato.");
             return;
         }
 
-        // Costruzione dinamica dei campi da mostrare
-        Map<String, Object> campi = new LinkedHashMap<>();
-        campi.put("Nome", prod.getName());
-        campi.put("Descrizione", prod.getDescription());
-        campi.put("Prezzo", prod.getPrice());
-        campi.put("Quantità", prod.getStock());
+        Map<String, Object> campi = getCampiDialog(prod);
 
-        // Mostra dialog dinamico
-        new Dialog(null,"Modifica Prodotto", campi, valoriInseriti -> {
-            // Aggiornamento del prodotto
-            String nome = valoriInseriti.get("Nome");
-            String descrizione = valoriInseriti.get("Descrizione");
-            int prezzo = Integer.parseInt(valoriInseriti.get("Prezzo"));
-            int quantity = Integer.parseInt(valoriInseriti.get("Quantità"));
-
-            prodottoDAO.updateProduct(id, nome, descrizione, prezzo, quantity);
-            load_data();
+        new Dialog(null, "Modifica Prodotto", campi, valoriInseriti -> {
+            Prodotto aggiornato = getProdottoFromInput(valoriInseriti);
+            prodottoDAO.updateProduct(id,
+                    aggiornato.getName(),
+                    aggiornato.getDescription(),
+                    aggiornato.getPrice(),
+                    aggiornato.getStock()
+            );
+            loadData();
         });
     }
 
-    private void deleteButtonCollback(ActionEvent e) {
+    private void onDelete(ActionEvent e) {
         int selected = tabella.getSelectedRow();
         if (selected == -1) {
-            JOptionPane.showMessageDialog(null, "Seleziona un prodotto.");
+            mostraErrore("Seleziona un prodotto.");
             return;
         }
-        int id = (Integer) modello.getValueAt(selected, 0);
+
+        int id = getSelectedOrderId();
         prodottoDAO.deleteProduct(id);
-        load_data();
+        loadData();
     }
 
-    private void load_data() {
-        modello.setRowCount(0);
-        List<Prodotto> lista = prodottoDAO.searchAll();
-        for (Prodotto p : lista) {
-            modello.addRow(new Object[]{
-                    p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getStock()
-            });
+    private Map<String, Object> getCampiDialog(Prodotto prod) {
+        Map<String, Object> campi = new LinkedHashMap<>();
+        campi.put("Nome", prod != null ? prod.getName() : "Nome del prodotto...");
+        campi.put("Descrizione", prod != null ? prod.getDescription() : "Descrizione del prodotto...");
+        campi.put("Prezzo", prod != null ? String.valueOf(prod.getPrice()) : "Prezzo del prodotto...");
+        campi.put("Quantità", prod != null ? String.valueOf(prod.getStock()) : "Quantità del prodotto...");
+        return campi;
+    }
+
+    private Prodotto getProdottoFromInput(Map<String, String> input) {
+        String nome = input.get("Nome");
+        String descrizione = input.get("Descrizione");
+        int prezzo = Integer.parseInt(input.get("Prezzo"));
+        int quantità = Integer.parseInt(input.get("Quantità"));
+
+        return new Prodotto(0, nome, descrizione, prezzo, quantità);
+    }
+
+    private void configurePanelLayout() {
+        setSize(800, 500);
+        setLayout(new BorderLayout());
+    }
+
+    private void setupButtons() {
+        if(isAdminView()) {
+            createButtons();
+            add(panelBottoni, BorderLayout.SOUTH);
         }
     }
 
-    private void load_data(int prodottoId) {
+    private DefaultTableModel createTableModel(String[] columns) {
+        return new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+    }
+
+    private void addOrderToTable(Prodotto prodotto) {
+        Object[] rowData = new Object[]{prodotto.getId(), prodotto.getName(), prodotto.getDescription(), prodotto.getPrice(), prodotto.getStock()};
+        modello.addRow(rowData);
+    }
+
+    private void loadData() {
         modello.setRowCount(0);
-        Prodotto prod = prodottoDAO.searchById(prodottoId);
 
-        modello.addRow(new Object[]{
-                prod.getId(), prod.getName(), prod.getDescription(), prod.getPrice(), prod.getStock()
-        });
+        List<Prodotto> prodotti = prodottoDAO.searchAll();
+        prodotti.forEach(this::addOrderToTable);
+    }
 
+    private void mostraErrore(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio);
+    }
+
+    private int getSelectedOrderId() {
+        return Integer.parseInt(tabella.getValueAt(tabella.getSelectedRow(), 0).toString());
     }
 }

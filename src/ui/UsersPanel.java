@@ -16,23 +16,25 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class UsersPanel extends JPanel {
+
+    private Integer userId;
     private JTable tabella;
     private DefaultTableModel modello;
     private JPanel panelBottoni;
     private UserDAOImplementation userDAO;
 
     public UsersPanel() {
-        setUpPanel();
-        load_data();
+        this((Integer) null); // call UserPanel(Integer userId)
     }
 
-    public UsersPanel(int userId ) {
+    public UsersPanel(Integer userId) {
+        this.userId = userId;
+        this.userDAO = new UserDAOImplementation();
         setUpPanel();
-        load_data(userId);
     }
 
     public UsersPanel(Consumer<Integer> onUserSelected) {
-        this();
+        this((Integer) null);
         panelBottoni.setVisible(false);
         tabella.addMouseListener(new MouseAdapter() {
             @Override
@@ -40,7 +42,7 @@ public class UsersPanel extends JPanel {
                 if (e.getClickCount() == 2) {
                     int row = tabella.getSelectedRow();
                     if (row != -1) {
-                        int userId = (int) modello.getValueAt(row, 0);
+                        int userId = getSelectedUserId(row);
                         onUserSelected.accept(userId);
                     }
                 }
@@ -48,23 +50,42 @@ public class UsersPanel extends JPanel {
         });
     }
 
+    private boolean isSingleView() {
+        return userId != null;
+    }
+
     private void setUpPanel() {
-        setSize(800, 500);
-        setLayout(new BorderLayout());
+        configurePanelLayout();
 
         // Tabella
-        modello = new DefaultTableModel(new Object[]{"ID", "Username", "Nome", "Cognome", "Indirizzo", "Cap", "Provincia", "Stato"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // solo la terza colonna è modificabile
-            };
-        };
+        modello = createTableModel(new String[]{"ID", "Username", "Nome", "Cognome", "Indirizzo", "Cap", "Provincia", "Stato"});
         tabella = new JTable(modello);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
         // Pulsanti
-        createButtons();
-        userDAO = new UserDAOImplementation();
+        setupButtons();
+        loadData();
+    }
+
+    private void configurePanelLayout() {
+        setSize(800, 500);
+        setLayout(new BorderLayout());
+    }
+
+    private DefaultTableModel createTableModel(String[] columns) {
+        return new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+    }
+
+    private void setupButtons() {
+        if(!isSingleView()) {
+            createButtons();
+            add(panelBottoni, BorderLayout.SOUTH);
+        }
     }
 
     private void createButtons() {
@@ -82,15 +103,13 @@ public class UsersPanel extends JPanel {
         panelBottoni.add(btnRole);
 
         // Eventi
-        btnAggiungi.addActionListener(this::addButtonCallback);
-        btnModifica.addActionListener(this::modifyButtonCallback);
-        btnElimina.addActionListener(this::deleteButtonCallback);
-        btnRole.addActionListener(this::roleButtonCallback);
-
-        add(panelBottoni, BorderLayout.SOUTH);
+        btnAggiungi.addActionListener(this::onAdd);
+        btnModifica.addActionListener(this::onModify);
+        btnElimina.addActionListener(this::onDelete);
+        btnRole.addActionListener(this::onRoleButton);
     }
 
-    private void addButtonCallback(ActionEvent e) {
+    private void onAdd(ActionEvent e) {
         Map<String, Object> campi = new LinkedHashMap<>();
         campi.put("Username", "Username...");
         campi.put("Password", "Password...");
@@ -108,27 +127,19 @@ public class UsersPanel extends JPanel {
             UserRole role = UserRole.fromString(valoriInseriti.get("Role"));
 
             userDAO.insert(username, password, role, nome, cognome);
-            load_data();
+            loadData();
         });
     }
 
-    private void modifyButtonCallback(ActionEvent e) {
-        int selected = tabella.getSelectedRow();
-        if (selected == -1) {
-            JOptionPane.showMessageDialog(null, "Seleziona un prodotto.");
-            return;
-        }
-        int id = (Integer) modello.getValueAt(selected, 0);
-        User user = userDAO.searchUserInfoById(id);
-
+    private void onModify(ActionEvent e) {
+        User user = getUserFromTable();
         if(user == null) {
-            JOptionPane.showMessageDialog(null, "Utente non trovato.");
+            mostraErrore("Utente non trovato.");
             return;
         }
 
         Map<String, Object> campi = new LinkedHashMap<>();
         campi.put("Username", user.getUsername());
-        campi.put("Password", user.getPassword());
         campi.put("Nome", user.getNome());
         campi.put("Cognome", user.getCognome());
         campi.put("Indirizzo", user.getIndirizzo());
@@ -148,70 +159,80 @@ public class UsersPanel extends JPanel {
             String stato = valoriInseriti.get("Stato");
 
             userDAO.UpdateUserInfo(user.getId(), nome, cognome, indirizzo, cap, provincia, stato);
-            load_data();
+            loadData();
         });
     }
 
-    private void deleteButtonCallback(ActionEvent e) {
+    private void onDelete(ActionEvent e) {
         int selected = tabella.getSelectedRow();
         if (selected == -1) {
-            JOptionPane.showMessageDialog(null, "Seleziona un prodotto.");
+            mostraErrore("Seleziona un utente.");
             return;
         }
-        int id = (Integer) modello.getValueAt(selected, 0);
+        int id = getSelectedUserId(selected);
         userDAO.deleteUser(id);
-        load_data();
+        loadData();
     }
 
-    private void roleButtonCallback(ActionEvent e) {
-        int selected = tabella.getSelectedRow();
-        if(selected == -1) {
-            JOptionPane.showMessageDialog(null, "Seleziona un utente.");
-            return;
-        }
-        int id = Integer.parseInt(tabella.getValueAt(selected, 0).toString());
-        User user = userDAO.searchUserInfoById(id);
+    private void onRoleButton(ActionEvent e) {
+        User user = getUserFromTable();
         if(user == null) {
-            JOptionPane.showMessageDialog(null, "Utente non trovato.");
+            mostraErrore("Utente non trovato.");
             return;
         }
 
         UserRole role = user.getRole();
+        role = toggleRole(role);
+
+        userDAO.UpdateRole(user.getId(), role);
+    }
+
+    private UserRole toggleRole(UserRole role) {
         if(role == UserRole.ADMIN) {
             role = UserRole.USER;
         }else {
             role = UserRole.ADMIN;
         }
-
-        userDAO.UpdateRole(id, role);
+        return role;
     }
 
-    private void setContent(Component comp, Container parent) {
-        parent.removeAll();
-        parent.add(comp, BorderLayout.CENTER);
-        parent.revalidate();
-        parent.repaint();
+    private void mostraErrore(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio);
     }
 
-    private void load_data() {
+    private User getUserFromTable() {
+        int selected = tabella.getSelectedRow();
+        if(selected == -1) {
+            mostraErrore("Seleziona un utente.");
+            return null;
+        }
+
+        int id = getSelectedUserId(selected);
+        return userDAO.searchUserInfoById(id);
+    }
+
+    private int getSelectedUserId(int selected_row) {
+        return Integer.parseInt(tabella.getValueAt(selected_row, 0).toString());
+    }
+
+    private void loadData() {
         modello.setRowCount(0);
-        List<User> userList = userDAO.searchUsersInfo();
-        for (User user : userList) {
-            modello.addRow(new Object[]{
-                    user.getId(),user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato()
-            });
+
+        if(isSingleView()) {
+            User user = userDAO.searchUserInfoById(userId);
+            if(user == null) {
+                mostraErrore("Utente non trovato.");
+                return;
+            }
+            addUserToTable(user);
+        }else {
+            List<User> users = userDAO.searchUsersInfo();
+            users.forEach(this::addUserToTable);
         }
     }
 
-    private void load_data(int userId) {
-        modello.setRowCount(0);
-        User user = userDAO.searchUserInfoById(userId);
-        if(user == null) {
-            JOptionPane.showMessageDialog(null, "Utente non trovato.");
-            return;
-        }
-        modello.addRow(new Object[]{
-                user.getId(),user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato()
-        });
+    private void addUserToTable(User user) {
+        Object[] rowData = new Object[]{user.getId(), user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato()};
+        modello.addRow(rowData);
     }
 }
