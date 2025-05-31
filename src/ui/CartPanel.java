@@ -1,9 +1,7 @@
 package ui;
 
-import db.DettaglioOrdineDAOImplementation;
 import db.OrdineDAOImplementation;
 import db.ProductDAOImplementation;
-import db.StatoOrdineDAOImplementation;
 import model.*;
 
 import javax.swing.*;
@@ -22,8 +20,6 @@ public class CartPanel extends JPanel {
     private DefaultTableModel modelloCart, modelloProdotti;
     private OrdineDAOImplementation ordineDAO;
     private ProductDAOImplementation prodottoDAO;
-    private DettaglioOrdineDAOImplementation dettaglioOrdineDAO;
-    private StatoOrdineDAOImplementation statoOrdineDAO;
 
     public CartPanel(int userId, boolean isAdmin) {
 
@@ -63,8 +59,6 @@ public class CartPanel extends JPanel {
 
         prodottoDAO = new ProductDAOImplementation();
         ordineDAO = new OrdineDAOImplementation();
-        dettaglioOrdineDAO = new DettaglioOrdineDAOImplementation();
-        statoOrdineDAO = new StatoOrdineDAOImplementation();
 
         load_data();
         this.userId = userId;

@@ -11,11 +11,6 @@ public class Ordine {
     private PaymentStatus payment_status;
     private DeliveryStatus delivery_status;
 
-    public Ordine() {
-
-    }
-
-
     public Ordine(int order_id, int user_id, Date date, List<DettaglioOrdine> details, PaymentStatus stato_pagamento, DeliveryStatus stato_consegna) {
         this.order_id = order_id;
         this.user_id = user_id;
@@ -84,13 +79,9 @@ public class Ordine {
 
     public void setDetails(List<DettaglioOrdine> details) {
         this.details = details;
-        for (DettaglioOrdine detail : details) {
-            detail.setOrder_id(order_id);
-        }
     }
 
     public void setDetails(DettaglioOrdine detail) {
         this.details.add(detail);
-        detail.setOrder_id(order_id);
     }
 }

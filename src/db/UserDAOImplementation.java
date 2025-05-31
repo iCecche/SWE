@@ -79,7 +79,7 @@ public class UserDAOImplementation implements UserDAO{
         builder.select()
                .from("USERS")
                .leftJoin("USER_INFO", "USERS.id = USER_INFO.ID")
-               .where("id = ?")
+               .where("USERS.id = ?")
                .addParameter(id);
 
         String sql = builder.getQuery();

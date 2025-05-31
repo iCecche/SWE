@@ -40,12 +40,12 @@ public class OrdineMapper extends RowMapper<Ordine> {
             if (contains(rs, "date")) {
                 builder.withDate(rs.getDate("date"));
             }
-            if (contains(rs, "stato_pagamento")) {
-                PaymentStatus payment_status = PaymentStatus.fromString(rs.getString("stato_pagamento"));
+            if (contains(rs, "payment_status")) {
+                PaymentStatus payment_status = PaymentStatus.fromString(rs.getString("payment_status"));
                 builder.withPaymentStatus(payment_status);
             }
-            if (contains(rs, "stato_consegna")) {
-                DeliveryStatus delivery_status = DeliveryStatus.fromString(rs.getString("stato_consegna"));
+            if (contains(rs, "delivery_status")) {
+                DeliveryStatus delivery_status = DeliveryStatus.fromString(rs.getString("delivery_status"));
                 builder.withDeliveryStatus(delivery_status);
             }
 

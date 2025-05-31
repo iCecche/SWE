@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface OrdineDAO {
 
-    List<Ordine> search();
-    void insert(Ordine order);
-    void update(String update_fields, String condition, Object... params);
-    void delete(String condition, Object... params);
+    QueryResult<Ordine> search(String sql, Object... params);
+    QueryResult<Ordine> insert(Ordine ordine);
+    QueryResult<Ordine> update(String sql, Object... params);
+    QueryResult<Ordine> delete(String sql, Object... params);
 
 }

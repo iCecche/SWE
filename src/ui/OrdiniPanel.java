@@ -2,7 +2,6 @@ package ui;
 
 import db.OrdineDAOImplementation;
 import db.ProductDAOImplementation;
-import db.StatoOrdineDAOImplementation;
 import model.*;
 
 import javax.swing.*;
@@ -11,16 +10,17 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.*;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class OrdiniPanel extends JPanel {
 
     private Map<Integer, Ordine> ordineMap;
     private JPanel panelBottoni;
-    private JTable dettaglioTable, orderTable;
-    private DefaultTableModel modelloDettaglio, modelloOrdine;
-    private OrdineDAOImplementation ordineDAO;
+    private final JTable dettaglioTable, orderTable;
+    private final DefaultTableModel modelloDettaglio, modelloOrdine;
+    private final OrdineDAOImplementation ordineDAO;
     private ProductDAOImplementation prodottoDAO;
     private Integer userId;
 

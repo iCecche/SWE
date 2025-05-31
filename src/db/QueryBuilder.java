@@ -6,10 +6,10 @@ import java.util.*;
 
 public class QueryBuilder {
 
-    private StringBuilder query;
-    private List<Object> params;
+    private final StringBuilder query;
+    private final List<Object> params;
     private record ColumnDef(String name, boolean isEnum, String enumType) {};
-    private List<ColumnDef> columnDefList;
+    private final List<ColumnDef> columnDefList;
     private QueryType queryType;
     private boolean whereAdded;
 
