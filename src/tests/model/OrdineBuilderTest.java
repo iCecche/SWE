@@ -1,6 +1,7 @@
 package tests.model;
 
 import main.model.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -10,16 +11,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrdineBuilderTest {
 
+    private OrdineBuilder builder;
+
+    @BeforeEach
+    void setUp() {
+        builder = OrdineBuilder.create();
+    }
+
     @Test
     void create() {
-        OrdineBuilder builder = OrdineBuilder.create();
         assertNotNull(builder);
         assertEquals(OrdineBuilder.class, builder.getClass());
     }
 
     @Test
     void withOrderId() {
-        OrdineBuilder builder = OrdineBuilder.create();
         builder.withOrderId(1);
 
         assertEquals(1, builder.build().getOrder_id());
@@ -27,7 +33,6 @@ class OrdineBuilderTest {
 
     @Test
     void withUserId() {
-        OrdineBuilder builder = OrdineBuilder.create();
         builder.withUserId(1);
 
         assertEquals(1, builder.build().getUser_id());
@@ -36,7 +41,6 @@ class OrdineBuilderTest {
     @Test
     void withDate() {
         Date date = new Date();
-        OrdineBuilder builder = OrdineBuilder.create();
         builder.withDate(date);
 
         assertEquals(date, builder.build().getDate());
@@ -45,7 +49,6 @@ class OrdineBuilderTest {
     @Test
     void withDetails() {
         DettaglioOrdine detail = new DettaglioOrdine(1, 1);
-        OrdineBuilder builder = OrdineBuilder.create();
         builder.withDetails(detail);
 
         assertEquals(detail, builder.build().getDetails().getFirst());
@@ -55,7 +58,6 @@ class OrdineBuilderTest {
     @Test
     void testWithDetails() {
         List<DettaglioOrdine> details = List.of(new DettaglioOrdine(1, 1), new DettaglioOrdine(2, 2));
-        OrdineBuilder builder = OrdineBuilder.create();
         builder.withDetails(details);
 
         assertEquals(2, builder.build().getDetails().size());
@@ -63,7 +65,6 @@ class OrdineBuilderTest {
 
     @Test
     void withPaymentStatus() {
-        OrdineBuilder builder = OrdineBuilder.create();
         builder.withPaymentStatus(PaymentStatus.PENDING);
 
         assertEquals(PaymentStatus.PENDING, builder.build().getPaymentStatus());
@@ -71,7 +72,6 @@ class OrdineBuilderTest {
 
     @Test
     void withDeliveryStatus() {
-        OrdineBuilder builder = OrdineBuilder.create();
         builder.withDeliveryStatus(DeliveryStatus.PENDING);
 
         assertEquals(DeliveryStatus.PENDING, builder.build().getDeliveryStatus());
@@ -79,8 +79,9 @@ class OrdineBuilderTest {
 
     @Test
     void build() {
-        OrdineBuilder builder = OrdineBuilder.create();
+        Ordine createdOrder = builder.build();
 
-        assertEquals(Ordine.class, builder.build().getClass());
+        assertEquals(Ordine.class, createdOrder.getClass());
+        assertNotNull(createdOrder);
     }
 }
