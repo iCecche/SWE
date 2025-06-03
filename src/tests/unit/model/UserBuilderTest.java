@@ -1,4 +1,4 @@
-package tests.model;
+package tests.unit.model;
 
 import main.model.User;
 import main.model.UserBuilder;

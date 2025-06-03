@@ -1,4 +1,4 @@
-package tests.model;
+package tests.unit.model;
 
 import main.db.QueryBuilder;
 import org.junit.jupiter.api.BeforeEach;
