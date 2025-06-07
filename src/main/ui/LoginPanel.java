@@ -2,7 +2,7 @@ package main.ui;
 
 import main.db.UserDAOImplementation;
 import main.model.User;
-import main.model.UserRole;
+import main.model.enums.UserRole;
 
 import javax.swing.*;
 import java.awt.*;

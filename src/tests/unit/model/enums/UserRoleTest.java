@@ -1,6 +1,6 @@
-package tests.unit.enums;
+package tests.unit.model.enums;
 
-import main.enums.UserRole;
+import main.model.enums.UserRole;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

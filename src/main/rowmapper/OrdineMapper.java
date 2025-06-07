@@ -1,5 +1,7 @@
 package main.rowmapper;
 
+import main.model.enums.DeliveryStatus;
+import main.model.enums.PaymentStatus;
 import main.model.*;
 
 import java.sql.ResultSet;

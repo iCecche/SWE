@@ -1,6 +1,6 @@
 package main.db;
 
-import main.model.QueryType;
+import main.model.enums.QueryType;
 
 import java.util.ArrayList;
 import java.util.List;

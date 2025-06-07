@@ -1,6 +1,6 @@
-package tests.unit.enums;
+package tests.unit.model.enums;
 
-import main.enums.DeliveryStatus;
+import main.model.enums.DeliveryStatus;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

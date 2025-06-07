@@ -1,5 +1,7 @@
 package main.model;
 
+import main.model.enums.UserRole;
+
 public class User {
 
     private int id;

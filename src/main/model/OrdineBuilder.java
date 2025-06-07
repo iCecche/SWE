@@ -1,5 +1,8 @@
 package main.model;
 
+import main.model.enums.DeliveryStatus;
+import main.model.enums.PaymentStatus;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

@@ -1,5 +1,7 @@
 package tests.unit.model;
 
+import main.model.enums.DeliveryStatus;
+import main.model.enums.PaymentStatus;
 import main.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

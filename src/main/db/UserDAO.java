@@ -1,7 +1,7 @@
 package main.db;
 
 import main.model.User;
-import main.model.UserRole;
+import main.model.enums.UserRole;
 
 public interface UserDAO{
 

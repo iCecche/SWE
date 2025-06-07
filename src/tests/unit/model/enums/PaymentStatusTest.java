@@ -1,6 +1,6 @@
-package tests.unit.enums;
+package tests.unit.model.enums;
 
-import main.enums.PaymentStatus;
+import main.model.enums.PaymentStatus;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

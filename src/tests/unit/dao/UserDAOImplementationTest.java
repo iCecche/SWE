@@ -4,7 +4,7 @@ import main.db.DBManager;
 import main.db.QueryResult;
 import main.db.UserDAOImplementation;
 import main.model.User;
-import main.model.UserRole;
+import main.model.enums.UserRole;
 import main.rowmapper.UserMapper;
 
 import org.junit.jupiter.api.AfterEach;

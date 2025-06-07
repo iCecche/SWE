@@ -1,8 +1,8 @@
 package main.db;
 import main.model.Ordine;
 import main.model.DettaglioOrdine;
-import main.model.DeliveryStatus;
-import main.model.PaymentStatus;
+import main.model.enums.DeliveryStatus;
+import main.model.enums.PaymentStatus;
 import main.rowmapper.OrdineMapper;
 
 import java.sql.SQLException;

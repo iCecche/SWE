@@ -2,6 +2,8 @@ package main.ui;
 
 import main.db.OrdineDAOImplementation;
 import main.db.ProductDAOImplementation;
+import main.model.enums.DeliveryStatus;
+import main.model.enums.PaymentStatus;
 import main.model.*;
 
 import javax.swing.*;

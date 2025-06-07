@@ -3,6 +3,8 @@ package tests.unit.dao;
 import main.db.DBManager;
 import main.db.OrdineDAOImplementation;
 import main.db.QueryResult;
+import main.model.enums.DeliveryStatus;
+import main.model.enums.PaymentStatus;
 import main.model.*;
 import main.rowmapper.OrdineMapper;
 

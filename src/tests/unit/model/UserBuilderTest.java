@@ -2,7 +2,7 @@ package tests.unit.model;
 
 import main.model.User;
 import main.model.UserBuilder;
-import main.model.UserRole;
+import main.model.enums.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

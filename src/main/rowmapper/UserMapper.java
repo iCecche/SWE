@@ -2,7 +2,7 @@ package main.rowmapper;
 
 import main.model.User;
 import main.model.UserBuilder;
-import main.model.UserRole;
+import main.model.enums.UserRole;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
