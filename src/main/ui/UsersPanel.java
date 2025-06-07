@@ -126,7 +126,7 @@ public class UsersPanel extends JPanel {
             String cognome = valoriInseriti.get("Cognome");
             UserRole role = UserRole.fromString(valoriInseriti.get("Role"));
 
-            userDAO.insert(username, password, role, nome, cognome);
+            userDAO.newUser(username, password, role, nome, cognome);
             loadData();
         });
     }

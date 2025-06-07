@@ -23,12 +23,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
         }
     }
 
-    // TODO: choose interface or abstract class, implemented search methods must be private (searchAll... only accessible methods)
     @Override
-    public QueryResult<Ordine> search(String sql, Object... params) {
-        return db.execute_query(sql, mapper, params);
-    }
-
     public List<Ordine> searchAll() {
         builder = QueryBuilder.create();
         builder.select("o.id AS order_id", "user_id", "date", "product_id", "quantity", "s.payment_status", "s.delivery_status")
@@ -41,6 +36,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
         return search(sql).getResults();
     }
 
+    @Override
     public List<Ordine> searchByUserID(int user_id) {
         builder = QueryBuilder.create();
         builder.select("o.id AS order_id", "user_id", "date", "product_id", "quantity", "payment_status", "delivery_status")
@@ -55,8 +51,12 @@ public class OrdineDAOImplementation implements OrdineDAO {
         return search(sql, params).getResults();
     }
 
+    private QueryResult<Ordine> search(String sql, Object... params) {
+        return db.execute_query(sql, mapper, params);
+    }
+
     @Override
-    public QueryResult<Ordine> insert(Ordine order) {
+    public void insertNewOrder(Ordine order) {
         db.execute_transaction(() -> {
             Long newOrderId = newOrder(order.getUser_id(), order.getDate());
             newOrderStatus(newOrderId, order.getPaymentStatus(), order.getDeliveryStatus());
@@ -65,7 +65,6 @@ public class OrdineDAOImplementation implements OrdineDAO {
             }
             return null;
         });
-        return null;
     }
 
     private Long newOrder(int user_id, Date date) {
@@ -113,15 +112,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
         }
     }
 
-    public void insertNewOrder(Ordine order) {
-        insert(order);
-    }
-
     @Override
-    public QueryResult<Ordine> update(String sql, Object... params) {;
-        return db.execute_query(sql, mapper, params);
-    }
-
     public void updateDeliveryStatus(int order_id, DeliveryStatus delivery_status) {
         builder = QueryBuilder.create();
         builder.update("ORDERS_STATUS")
@@ -134,6 +125,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
         update(sql, params);
     }
 
+    @Override
     public void updatePaymentStatus(int order_id, PaymentStatus payment_status) {
         builder = QueryBuilder.create();
         builder.update("ORDERS_STATUS")
@@ -146,11 +138,11 @@ public class OrdineDAOImplementation implements OrdineDAO {
         update(sql, params);
     }
 
-    @Override
-    public QueryResult<Ordine> delete(String sql, Object... params) {
-        return db.execute_query(sql, mapper, params);
+    private void update(String sql, Object... params) {;
+        db.execute_query(sql, mapper, params);
     }
 
+    @Override
     public void deleteOrder(int order_id) {
         builder = QueryBuilder.create();
         builder.deleteFrom("ORDERS")
@@ -160,5 +152,9 @@ public class OrdineDAOImplementation implements OrdineDAO {
         String sql = builder.getQuery();
         Object[] params = builder.getParameters();
         delete(sql, params);
+    }
+
+    private void delete(String sql, Object... params) {
+         db.execute_query(sql, mapper, params);
     }
 }

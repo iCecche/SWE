@@ -21,14 +21,7 @@ public class UserDAOImplementation implements UserDAO{
         }
     }
 
-    // CRUD OPERATIONS
-    // TODO: choose interface or abstract class, implemented search methods must be private (searchAll... only accessible methods)
     @Override
-    public QueryResult<User> search(String sql, Object... params) {
-        return db.execute_query(sql, mapper, params);
-    }
-
-    // public method for user interface
     public List<User> searchAll() {
         builder = QueryBuilder.create();
         builder.select()
@@ -38,6 +31,7 @@ public class UserDAOImplementation implements UserDAO{
         return search(sql).getResults();
     }
 
+    @Override
     public User searchById(int id) {
         builder = QueryBuilder.create();
         builder.select()
@@ -50,6 +44,7 @@ public class UserDAOImplementation implements UserDAO{
         return search(sql, params).getSingleResult().orElse(null);
     }
 
+    @Override
     public User searchByUsername(String username) {
         builder = QueryBuilder.create();
         builder.select()
@@ -62,6 +57,7 @@ public class UserDAOImplementation implements UserDAO{
         return search(sql, params).getSingleResult().orElse(null);
     }
 
+    @Override
     public List<User> searchUsersInfo() {
         builder = QueryBuilder.create();
         builder.select()
@@ -72,6 +68,7 @@ public class UserDAOImplementation implements UserDAO{
         return search(sql).getResults();
     }
 
+    @Override
     public User searchUserInfoById(int id) {
         builder = QueryBuilder.create();
         builder.select()
@@ -85,8 +82,12 @@ public class UserDAOImplementation implements UserDAO{
         return search(sql, params).getSingleResult().orElse(null);
     }
 
-    @Override
-    public void insert(String username, String password, UserRole role, String nome, String cognome) {
+    private QueryResult<User> search(String sql, Object... params) {
+        return db.execute_query(sql, mapper, params);
+    }
+
+   @Override
+    public void newUser(String username, String password, UserRole role, String nome, String cognome) {
         db.execute_transaction(() -> {
             Long userId = insertUser(username, password, role);
             insertUserInfo(userId, nome, cognome);
@@ -127,10 +128,6 @@ public class UserDAOImplementation implements UserDAO{
     }
 
     @Override
-    public QueryResult<User> update(String sql, Object... params) {
-        return db.execute_query(sql, mapper, params);
-    }
-
     public void UpdateCredentials(int id, String username, String password) {
         builder = QueryBuilder.create();
         builder.update("USERS")
@@ -144,6 +141,7 @@ public class UserDAOImplementation implements UserDAO{
         update(sql, params);
     }
 
+    @Override
     public void UpdateRole(int id, UserRole role) {
         builder = QueryBuilder.create();
         builder.update("USERS")
@@ -156,6 +154,7 @@ public class UserDAOImplementation implements UserDAO{
         update(sql, params);
     }
 
+    @Override
     public void UpdateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
         builder = QueryBuilder.create();
         builder.update("USER_INFO")
@@ -173,11 +172,11 @@ public class UserDAOImplementation implements UserDAO{
         update(sql, params);
     }
 
-    @Override
-    public QueryResult<User> delete(String sql, Object... params) {
-        return db.execute_query(sql, mapper, params);
+    private void update(String sql, Object... params) {
+        db.execute_query(sql, mapper, params);
     }
 
+    @Override
     public void deleteUser(int id) {
         builder = QueryBuilder.create();
         builder.deleteFrom("USERS")
@@ -187,5 +186,9 @@ public class UserDAOImplementation implements UserDAO{
         String sql = builder.getQuery();
         Object[] params = builder.getParameters();
         delete(sql, params);
+    }
+
+    private void delete(String sql, Object... params) {
+        db.execute_query(sql, mapper, params);
     }
 }

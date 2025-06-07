@@ -2,13 +2,20 @@ package main.db;
 
 import main.model.Prodotto;
 
+import java.util.List;
+
 public interface ProductDAO {
 
-    QueryResult<Prodotto> search(String sql, Object... params);
+    // Search
+    List<Prodotto> searchAll();
+    Prodotto searchById(int id);
 
-    void insert(String sql, Object... params);
+    // Insert
+    void insertNewProduct(String name, String description, Integer price, Integer stock_quantity);
 
-    void update(String sql, Object... params);
+    // Update
+    void updateProduct(int id, String name, String description, Integer price, Integer stock);
 
-    void delete(String sql, Object... params);
+    // Delete
+    void deleteProduct(int id);
 }

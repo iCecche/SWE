@@ -112,7 +112,6 @@ public class DBManager {
         T execute() throws SQLException;
     }
 
-
     public <T> QueryResult<T> execute_query(String sql, RowMapper<T> mapper, Object... params) {
         QueryResult<T> query_result;
         connect();
