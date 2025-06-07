@@ -2,7 +2,6 @@ package model;
 
 public class DettaglioOrdine {
 
-    private int order_id;
     private int product_id;
     private int quantity;
 
