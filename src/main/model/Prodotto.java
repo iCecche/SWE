@@ -8,7 +8,6 @@ public class Prodotto {
     private int price;
     private int stock;
 
-    public Prodotto() {};
     public Prodotto(int id, String name, String description, int price, int stock) {
         this.id = id;
         this.name = name;
