@@ -13,9 +13,7 @@ public class User {
     private String provincia;
     private String stato;
 
-
-    public User() {};
-    public User(int id, String username, String password, UserRole role) {
+    private User(int id, String username, String password, UserRole role) {
         this.id = id;
         this.username = username;
         this.password = password;
