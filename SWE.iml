@@ -13,5 +13,6 @@
     <orderEntry type="library" exported="" name="postgresql-42.7.5" level="project" />
     <orderEntry type="library" name="junit.jupiter" level="project" />
     <orderEntry type="library" name="mockito.core" level="project" />
+    <orderEntry type="library" name="h2database.h2" level="project" />
   </component>
 </module>
