@@ -20,6 +20,11 @@ public class ProductDAOImplementation implements ProductDAO {
         }
     }
 
+    public ProductDAOImplementation(DBManager db) {
+        this.db = db;
+        mapper = new ProductMapper();
+    }
+
     @Override
     public List<Prodotto> searchAll() {
         builder = QueryBuilder.create();

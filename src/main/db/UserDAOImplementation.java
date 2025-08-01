@@ -21,6 +21,11 @@ public class UserDAOImplementation implements UserDAO{
         }
     }
 
+    public UserDAOImplementation(DBManager db) {
+        this.db = db;
+        mapper = new UserMapper();
+    }
+
     @Override
     public List<User> searchAll() {
         builder = QueryBuilder.create();

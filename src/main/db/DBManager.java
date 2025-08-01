@@ -2,6 +2,9 @@ package main.db;
 
 import main.rowmapper.RowMapper;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -11,13 +14,38 @@ public class DBManager {
     private static final AtomicReference<DBManager> instance = new AtomicReference<>();
     private Connection connection;
 
+    private final String jdbcUrl;
+    private final String username;
+    private final String password;
+    private final String driverClassName;
+
     private final ThreadLocal<Connection> transactionConnection = new ThreadLocal<>();
     private final ThreadLocal<Boolean> inTransaction = new ThreadLocal<>();
 
     // singleton pattern for a single connection to main.db
     private DBManager() {
+        this.jdbcUrl = System.getenv("JDBC_URL");
+        this.username = System.getenv("JDBC_USERNAME");
+        this.password = System.getenv("JDBC_PASSWORD");
+        this.driverClassName = System.getenv("JDBC_DRIVER_CLASS_NAME");
         this.inTransaction.set(false);
     };
+
+    protected DBManager(String jdbcUrl, String username, String password, String driverClassName) {
+        this.jdbcUrl = jdbcUrl;
+        this.username = username;
+        this.password = password;
+        this.driverClassName = driverClassName;
+        this.inTransaction.set(false);
+    }
+
+    public static DBManager getTestInstance(String jdbcUrl, String username, String password, String driverClassName) {
+        return new DBManager(jdbcUrl, username, password, driverClassName);
+    }
+
+    private static void resetInstance() {
+        instance.set(null);
+    }
 
     public static DBManager getInstance() throws SQLException {
         return instance.updateAndGet(dbManager -> dbManager != null ? dbManager : new DBManager());
@@ -28,13 +56,9 @@ public class DBManager {
     }
 
     private void connect() {
-        final String jdbcUrl = System.getenv("JDBC_URL");
-        final String username = System.getenv("JDBC_USERNAME");
-        final String password = System.getenv("JDBC_PASSWORD");
         try {
-            // Register the PostgreSQL driver
-            Class.forName("org.postgresql.Driver");
             // Connect to the database
+            Class.forName(driverClassName);
             if(Boolean.TRUE.equals(inTransaction.get()))
                 connection = transactionConnection.get();
             else
@@ -184,5 +208,23 @@ public class DBManager {
 
     private boolean isSelectQuery(String sql) {
         return sql.trim().toLowerCase().startsWith("select");
+    }
+
+    public void executeSqlFile(String filePath) {
+        connect();
+        try {
+            String sql = new String(Files.readAllBytes(Paths.get(filePath)));
+            try (Statement stmt = connection.createStatement()) {
+                for (String statement : sql.split(";")) {
+                    if (!statement.trim().isEmpty()) {
+                        stmt.execute(statement);
+                    }
+                }
+            }
+        } catch (IOException | SQLException e) {
+            throw new RuntimeException("Errore nell'esecuzione dello script SQL", e);
+        }finally {
+            disconnect();
+        }
     }
 }

@@ -23,6 +23,11 @@ public class OrdineDAOImplementation implements OrdineDAO {
         }
     }
 
+    public OrdineDAOImplementation(DBManager db) {
+        this.db = db;
+        mapper = new OrdineMapper();
+    }
+
     @Override
     public List<Ordine> searchAll() {
         builder = QueryBuilder.create();
