@@ -1,4 +1,4 @@
-package tests.unit.dao;
+package test.unit.dao;
 
 import main.db.DBManager;
 import main.db.OrdineDAOImplementation;

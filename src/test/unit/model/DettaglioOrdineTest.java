@@ -1,4 +1,4 @@
-package tests.unit.model;
+package test.unit.model;
 
 import main.model.DettaglioOrdine;
 import org.junit.jupiter.api.BeforeEach;

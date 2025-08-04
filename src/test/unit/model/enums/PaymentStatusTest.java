@@ -1,4 +1,4 @@
-package tests.unit.model.enums;
+package test.unit.model.enums;
 
 import main.model.enums.PaymentStatus;
 import org.junit.jupiter.api.Test;

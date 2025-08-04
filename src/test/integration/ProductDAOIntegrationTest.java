@@ -1,4 +1,4 @@
-package tests.integration;
+package test.integration;
 
 import main.db.DBManager;
 import main.db.ProductDAOImplementation;

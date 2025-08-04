@@ -1,4 +1,4 @@
-package tests.unit.model;
+package test.unit.model;
 
 import main.model.enums.DeliveryStatus;
 import main.model.enums.PaymentStatus;
