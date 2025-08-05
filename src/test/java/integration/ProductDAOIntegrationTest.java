@@ -4,6 +4,7 @@ import db.DBManager;
 import db.ProductDAOImplementation;
 import model.Prodotto;
 import org.junit.jupiter.api.*;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.util.List;
 
@@ -11,30 +12,33 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ProductDAOIntegrationTest {
     private static ProductDAOImplementation productDAO;
-    private static DBManager db;
+    private static PostgreSQLContainer<?> postgres;
 
     @BeforeAll
     static void initDB() {
-        final String jdbcURL = "jdbc:h2:mem:default;DB_CLOSE_DELAY=-1";
-        final String jdbcUsername = "user_test";
-        final String jdbcPassword = "password_test";
-        final String jdbcDriver = "org.h2.Driver";
-
-        db = DBManager.getTestInstance(jdbcURL, jdbcUsername, jdbcPassword, jdbcDriver);
+        postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+                .withDatabaseName("test_db")
+                .withUsername("user_test")
+                .withPassword("password_test")
+                .withInitScript("init.sql");
     }
 
     @BeforeEach
     void setUp() {
-        // inizializza lo schema del db
-        db.executeSqlFile("/Users/gabrielececcherini/IdeaProjects/SWE/src/tests/resources/schema.sql");
-        db.executeSqlFile("/Users/gabrielececcherini/IdeaProjects/SWE/src/tests/resources/test-data.sql");
+        postgres.start();
 
+        final String jdbcURL = postgres.getJdbcUrl();
+        final String jdbcUsername = postgres.getUsername();
+        final String jdbcPassword = postgres.getPassword();
+        final String jdbcDriver = "org.postgresql.Driver";
+
+        DBManager db = DBManager.getTestInstance(jdbcURL, jdbcUsername, jdbcPassword, jdbcDriver);
         productDAO = new ProductDAOImplementation(db);
     }
 
     @AfterEach
     void tearDown() {
-        db.executeSqlFile("/Users/gabrielececcherini/IdeaProjects/SWE/src/tests/resources/clean-up.sql");
+        postgres.close();
     }
 
     @Test
@@ -92,7 +96,7 @@ class ProductDAOIntegrationTest {
         assertNotNull(product);
         assertEquals(10, product.getId());
 
-        // FIXME: gestire cancellazione prodotto ( se presente in ordini c'è problema ) -> flag su db 'is_deleted' invece di cancellazione oppure set null?
+        // FIXME: gestire cancellazione prodotto ( se presente in ordini c'è problema ) -> flag su main.db 'is_deleted' invece di cancellazione oppure set null?
 
         // delete product
         //productDAO.deleteProduct(10);

@@ -209,22 +209,4 @@ public class DBManager {
     private boolean isSelectQuery(String sql) {
         return sql.trim().toLowerCase().startsWith("select");
     }
-
-    public void executeSqlFile(String filePath) {
-        connect();
-        try {
-            String sql = new String(Files.readAllBytes(Paths.get(filePath)));
-            try (Statement stmt = connection.createStatement()) {
-                for (String statement : sql.split(";")) {
-                    if (!statement.trim().isEmpty()) {
-                        stmt.execute(statement);
-                    }
-                }
-            }
-        } catch (IOException | SQLException e) {
-            throw new RuntimeException("Errore nell'esecuzione dello script SQL", e);
-        }finally {
-            disconnect();
-        }
-    }
 }
