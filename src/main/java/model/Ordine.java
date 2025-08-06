@@ -24,6 +24,13 @@ public class Ordine {
         this.delivery_status = stato_consegna;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Ordine other)) return false;
+        return this.order_id == other.order_id;
+    }
+
     public void print() {
         System.out.println("OrderId: " + order_id);
         System.out.println("UserId: " + user_id);

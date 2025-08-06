@@ -61,14 +61,14 @@ public class OrdineDAOImplementation implements OrdineDAO {
     }
 
     @Override
-    public void insertNewOrder(Ordine order) {
-        db.execute_transaction(() -> {
+    public Long insertNewOrder(Ordine order) {
+        return db.execute_transaction(() -> {
             Long newOrderId = newOrder(order.getUser_id(), order.getDate());
             newOrderStatus(newOrderId, order.getPaymentStatus(), order.getDeliveryStatus());
             for(DettaglioOrdine detail : order.getDetails()) {
                 newOrderDetail(newOrderId, detail.getProduct_id(), detail.getQuantity()); //fixme: posso rimuovere orderId da DettaglioOrdine dato che adesso sono inclusi in Obj di tipo Ordine
             }
-            return null;
+            return newOrderId;
         });
     }
 
