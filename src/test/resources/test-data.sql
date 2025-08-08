@@ -34,11 +34,11 @@ INSERT INTO PRODUCT (NAME, DESCRIPTION, PRICE, STOCK_QUANTITY) VALUES
     ('Router WiFi 6', 'Router ad alte prestazioni', 130, 50),
     ('Webcam HD', 'Webcam Full HD', 70, 55);
 
-INSERT INTO ORDERS (USER_ID, DATE) VALUES
-    (1, '2025-04-01'), -- Mario compra 1 Laptop
-    (2, '2025-04-02'), -- Luigi compra 2 Smartphone
-    (3, '2025-04-03'), -- Anna compra 1 Cuffie Bluetooth
-    (4, '2025-04-04'); -- Carla compra 3 Smartwatch
+INSERT INTO ORDERS (USER_ID, DATE, DELIVERY_STATUS, PAYMENT_STATUS) VALUES
+    (1, '2025-04-01','PENDING', 'PENDING'), -- Mario compra 1 Laptop
+    (2, '2025-04-02','PENDING', 'PAID'), -- Luigi compra 2 Smartphone
+    (3, '2025-04-03','DELIVERED', 'PAID'), -- Anna compra 1 Cuffie Bluetooth
+    (4, '2025-04-04','SHIPPED', 'PENDING'); -- Carla compra 3 Smartwatch
 
 
 INSERT INTO ORDERS_DETAILS (ORDER_ID, PRODUCT_ID, QUANTITY) VALUES
@@ -49,9 +49,3 @@ INSERT INTO ORDERS_DETAILS (ORDER_ID, PRODUCT_ID, QUANTITY) VALUES
     (3, 3, 3),
     (3, 9, 25),
     (4, 4, 40);
-
-INSERT INTO ORDERS_STATUS (ORDER_ID, DELIVERY_STATUS, PAYMENT_STATUS) VALUES
-    (1, 'PENDING', 'PENDING'),
-    (2, 'PENDING', 'PAID'),
-    (3, 'DELIVERED', 'PAID'),
-    (4, 'SHIPPED', 'PENDING');

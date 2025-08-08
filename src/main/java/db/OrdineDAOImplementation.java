@@ -31,9 +31,8 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public List<Ordine> searchAll() {
         builder = QueryBuilder.create();
-        builder.select("o.id AS order_id", "user_id", "date", "product_id", "quantity", "s.payment_status", "s.delivery_status")
+        builder.select("o.id AS order_id", "user_id", "date", "product_id", "quantity", "payment_status", "delivery_status")
                 .from("ORDERS o")
-                .leftJoin("ORDERS_STATUS s", "s.order_id = o.id")
                 .leftJoin("ORDERS_DETAILS d", "d.order_id = o.id")
                 .orderBy("o.id");
 
@@ -46,7 +45,6 @@ public class OrdineDAOImplementation implements OrdineDAO {
         builder = QueryBuilder.create();
         builder.select("o.id AS order_id", "user_id", "date", "product_id", "quantity", "payment_status", "delivery_status")
                 .from("ORDERS o")
-                .leftJoin("ORDERS_STATUS s", "o.id = s.order_id")
                 .leftJoin("ORDERS_DETAILS d", "d.order_id = o.id")
                 .where("user_id = ?")
                 .addParameter(user_id);
@@ -63,8 +61,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public Long insertNewOrder(Ordine order) {
         return db.execute_transaction(() -> {
-            Long newOrderId = newOrder(order.getUser_id(), order.getDate());
-            newOrderStatus(newOrderId, order.getPaymentStatus(), order.getDeliveryStatus());
+            Long newOrderId = newOrder(order.getUser_id(), order.getDate(), order.getDeliveryStatus(), order.getPaymentStatus());
             for(DettaglioOrdine detail : order.getDetails()) {
                 newOrderDetail(newOrderId, detail.getProduct_id(), detail.getQuantity()); //fixme: posso rimuovere orderId da DettaglioOrdine dato che adesso sono inclusi in Obj di tipo Ordine
             }
@@ -72,10 +69,12 @@ public class OrdineDAOImplementation implements OrdineDAO {
         });
     }
 
-    private Long newOrder(int user_id, Date date) {
+    private Long newOrder(int user_id, Date date, DeliveryStatus delivery_status, PaymentStatus payment_status) {
         builder = QueryBuilder.create();
-        builder.insertInto("ORDERS", "user_id", "date")
-                .values(user_id, date);
+        builder.insertInto("ORDERS", "user_id", "date", "delivery_status", "payment_status")
+                .withEnumColumn("payment_status", "payment_status_type")
+                .withEnumColumn("delivery_status", "delivery_status_type")
+                .values(user_id, date, delivery_status.toString(), payment_status.toString());
 
         String sql = builder.getQuery();
         Object[] params = builder.getParameters();
@@ -100,27 +99,10 @@ public class OrdineDAOImplementation implements OrdineDAO {
         db.execute_query(sql, mapper, params);
     }
 
-    private void newOrderStatus(Long order_id, PaymentStatus payment_status, DeliveryStatus delivery_status) {
-        builder = QueryBuilder.create();
-        builder.insertInto("ORDERS_STATUS", "order_id", "payment_status", "delivery_status")
-                .withEnumColumn("payment_status", "payment_status_type")
-                .withEnumColumn("delivery_status", "delivery_status_type")
-                .values(order_id, payment_status.toString(), delivery_status.toString());
-
-        String sql = builder.getQuery();
-        Object[] params = builder.getParameters();
-
-        QueryResult<Ordine> order_status_result = db.execute_query(sql, mapper, params);
-
-        if(order_status_result.getGeneratedKey().isEmpty()) {
-            throw new RuntimeException("Error inserting order status!");
-        }
-    }
-
     @Override
     public void updateDeliveryStatus(int order_id, DeliveryStatus delivery_status) {
         builder = QueryBuilder.create();
-        builder.update("ORDERS_STATUS")
+        builder.update("ORDERS")
                 .set("delivery_status", delivery_status.toString(), true)
                 .where("order_id = ?")
                 .addParameter(order_id);
@@ -133,7 +115,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public void updatePaymentStatus(int order_id, PaymentStatus payment_status) {
         builder = QueryBuilder.create();
-        builder.update("ORDERS_STATUS")
+        builder.update("ORDERS")
                 .set("payment_status", payment_status.toString(), true)
                 .where("order_id = ?")
                 .addParameter(order_id);
