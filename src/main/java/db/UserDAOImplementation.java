@@ -92,11 +92,11 @@ public class UserDAOImplementation implements UserDAO{
     }
 
    @Override
-    public void newUser(String username, String password, UserRole role, String nome, String cognome) {
-        db.execute_transaction(() -> {
+    public Long newUser(String username, String password, UserRole role, String nome, String cognome) {
+        return db.execute_transaction(() -> {
             Long userId = insertUser(username, password, role);
             insertUserInfo(userId, nome, cognome);
-            return null;
+            return userId;
         });
     }
 

@@ -15,7 +15,7 @@ public interface UserDAO{
     User searchUserInfoById(int id);
 
     // Insert
-    void newUser(String username, String password, UserRole role, String nome, String cognome);
+    Long newUser(String username, String password, UserRole role, String nome, String cognome);
 
     // Update
     void UpdateCredentials(int id, String username, String password);

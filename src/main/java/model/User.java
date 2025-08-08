@@ -32,6 +32,13 @@ public class User {
         this.stato = stato;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof User other)) return false;
+        return this.id == other.id;
+    }
+
     public int getId() {
         return id;
     }
