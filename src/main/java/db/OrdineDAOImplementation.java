@@ -104,7 +104,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
         builder = QueryBuilder.create();
         builder.update("ORDERS")
                 .set("delivery_status", delivery_status.toString(), true)
-                .where("order_id = ?")
+                .where("id = ?")
                 .addParameter(order_id);
 
         String sql = builder.getQuery();
@@ -115,9 +115,9 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public void updatePaymentStatus(int order_id, PaymentStatus payment_status) {
         builder = QueryBuilder.create();
-        builder.update("ORDERS")
+        builder.update("ORDERS o")
                 .set("payment_status", payment_status.toString(), true)
-                .where("order_id = ?")
+                .where("id = ?")
                 .addParameter(order_id);
 
         String sql = builder.getQuery();
