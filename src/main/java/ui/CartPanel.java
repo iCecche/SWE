@@ -174,6 +174,7 @@ public class CartPanel extends JPanel {
         modelloProdotti.setRowCount(0);
         List<Prodotto> lista = prodottoDAO.searchAll();
         for (Prodotto p : lista) {
+            if(p.isDeleted()) continue;
             modelloProdotti.addRow(new Object[]{
                     p.getId(), p.getName(), p.getDescription(), p.getPrice(), p.getStock()
             });

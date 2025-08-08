@@ -7,13 +7,15 @@ public class Prodotto {
     private String description;
     private int price;
     private int stock;
+    private boolean is_deleted;
 
-    public Prodotto(int id, String name, String description, int price, int stock) {
+    public Prodotto(int id, String name, String description, int price, int stock, boolean is_deleted) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.stock = stock;
+        this.is_deleted = is_deleted;
     }
 
     public int getId() {
@@ -34,6 +36,10 @@ public class Prodotto {
 
     public int getStock() {
         return stock;
+    }
+
+    public boolean isDeleted() {
+        return is_deleted;
     }
 
     public void print() {

@@ -14,7 +14,8 @@ public class ProductMapper extends RowMapper<Prodotto> {
         String password = rs.getString("description");
         int price = rs.getInt("price");
         int stock = rs.getInt("stock_quantity");
+        boolean is_deleted = rs.getBoolean("is_deleted");
 
-        return new Prodotto(id, username, password, price, stock);
+        return new Prodotto(id, username, password, price, stock, is_deleted);
     }
 }

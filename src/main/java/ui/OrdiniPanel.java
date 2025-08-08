@@ -22,7 +22,7 @@ public class OrdiniPanel extends JPanel {
 
     private static final String[] ADMIN_COLUMNS = {"Order ID", "User ID", "Date", "Delivery Status", "Payment Status"};
     private static final String[] USER_COLUMNS = {"Order ID", "Date", "Delivery Status", "Payment Status"};
-    private static final String[] DETAIL_COLUMNS = {"Product ID", "Nome", "Descrizione", "Prezzo", "Quantity"};
+    private static final String[] DETAIL_COLUMNS = {"Product ID", "Nome", "Descrizione", "Prezzo", "Quantity", "Deleted"};
 
     private final Map<Integer, Ordine> ordineMap = new HashMap<>();
     private JPanel panelBottoni;
@@ -104,9 +104,12 @@ public class OrdiniPanel extends JPanel {
             ordine.getDetails().forEach(detail -> {
                 Prodotto prodotto = prodottoDAO.searchById(detail.getProduct_id());
                 modelloDettaglio.addRow(new Object[]{
-                        prodotto.getId(), prodotto.getName(),
-                        prodotto.getDescription(), prodotto.getPrice(),
-                        detail.getQuantity()
+                        prodotto.getId(),
+                        prodotto.getName(),
+                        prodotto.getDescription(),
+                        prodotto.getPrice(),
+                        detail.getQuantity(),
+                        prodotto.isDeleted()
                 });
             });
         }

@@ -90,7 +90,8 @@ public class ProductDAOImplementation implements ProductDAO {
     @Override
     public void deleteProduct(int id) {
         builder = QueryBuilder.create();
-        builder.deleteFrom("PRODUCT")
+        builder.update("PRODUCT")
+                .set("is_deleted", true)
                 .where("id = ?")
                 .addParameter(id);
 

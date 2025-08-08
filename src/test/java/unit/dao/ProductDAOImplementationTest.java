@@ -44,7 +44,7 @@ class ProductDAOImplementationTest {
 
     @Test
     void searchAll() {
-        Prodotto prodotto = new Prodotto(1, "Nome", "Descrizione", 10, 100);
+        Prodotto prodotto = new Prodotto(1, "Nome", "Descrizione", 10, 100, false);
         Object[] params = new Object[0];
 
         // Configura il comportamento del mock
@@ -62,7 +62,7 @@ class ProductDAOImplementationTest {
 
     @Test
     void searchById() {
-        Prodotto prodotto = new Prodotto(10, "Nome", "Descrizione", 10, 100);
+        Prodotto prodotto = new Prodotto(10, "Nome", "Descrizione", 10, 100, false);
 
         // Configura il comportamento del mock
         QueryResult<Prodotto> expectedResult = QueryResult.ofSelect(List.of(prodotto));

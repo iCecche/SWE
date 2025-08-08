@@ -12,7 +12,7 @@ class ProdottoTest {
 
     @BeforeEach
     void setUp() {
-        prodotto = new Prodotto(1, "nome", "descrizione", 1, 1);
+        prodotto = new Prodotto(1, "nome", "descrizione", 1, 1, false);
     }
 
     @Test
@@ -43,5 +43,11 @@ class ProdottoTest {
     void getStock() {
         int stock = prodotto.getStock();
         assertEquals(1, stock);
+    }
+
+    @Test
+    void getIsDeleted() {
+        boolean is_deleted = prodotto.isDeleted();
+        assertFalse(is_deleted);
     }
 }

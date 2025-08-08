@@ -25,7 +25,7 @@ public class ProdottiPanel extends JPanel {
 
         configurePanelLayout();
 
-        modello = createTableModel(new String[]{"ID", "Nome", "Descrizione", "Prezzo", "Stock"});
+        modello = createTableModel();
         tabella = new JTable(modello);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
@@ -106,6 +106,10 @@ public class ProdottiPanel extends JPanel {
             return;
         }
 
+        // evita chiamata a db per prodotti già eliminati
+        if(!getSelectedOrderDeleted())
+            return;
+
         int id = getSelectedOrderId();
         prodottoDAO.deleteProduct(id);
         loadData();
@@ -126,7 +130,7 @@ public class ProdottiPanel extends JPanel {
         int prezzo = Integer.parseInt(input.get("Prezzo"));
         int quantità = Integer.parseInt(input.get("Quantità"));
 
-        return new Prodotto(0, nome, descrizione, prezzo, quantità);
+        return new Prodotto(0, nome, descrizione, prezzo, quantità, false);
     }
 
     private void configurePanelLayout() {
@@ -141,7 +145,11 @@ public class ProdottiPanel extends JPanel {
         }
     }
 
-    private DefaultTableModel createTableModel(String[] columns) {
+    private DefaultTableModel createTableModel() {
+        String[] columns;
+        if (isAdmin) columns = new String[]{"ID", "Nome", "Descrizione", "Prezzo", "Stock", "Deleted"};
+        else columns = new String[]{"ID", "Nome", "Descrizione", "Prezzo", "Stock"};
+
         return new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -151,7 +159,14 @@ public class ProdottiPanel extends JPanel {
     }
 
     private void addOrderToTable(Prodotto prodotto) {
-        Object[] rowData = new Object[]{prodotto.getId(), prodotto.getName(), prodotto.getDescription(), prodotto.getPrice(), prodotto.getStock()};
+        Object[] rowData;
+        if (isAdmin)
+            rowData = new Object[]{prodotto.getId(), prodotto.getName(), prodotto.getDescription(), prodotto.getPrice(), prodotto.getStock(), prodotto.isDeleted()};
+        else {
+            if (prodotto.isDeleted())
+                return;
+            rowData = new Object[]{prodotto.getId(), prodotto.getName(), prodotto.getDescription(), prodotto.getPrice(), prodotto.getStock()};
+        }
         modello.addRow(rowData);
     }
 
@@ -168,5 +183,9 @@ public class ProdottiPanel extends JPanel {
 
     private int getSelectedOrderId() {
         return Integer.parseInt(tabella.getValueAt(tabella.getSelectedRow(), 0).toString());
+    }
+
+    private boolean getSelectedOrderDeleted() {
+        return (boolean) tabella.getValueAt(tabella.getSelectedRow(), 5);
     }
 }
