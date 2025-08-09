@@ -156,8 +156,9 @@ public class QueryBuilder {
         return this;
     }
 
-    public void addParameter(Object value) {
+    public QueryBuilder addParameter(Object value) {
         params.add(value);
+        return null;
     }
 
     public QueryBuilder orderBy(String... columns) {

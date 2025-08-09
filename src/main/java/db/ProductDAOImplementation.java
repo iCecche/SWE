@@ -1,5 +1,6 @@
 package db;
 
+import model.DettaglioOrdine;
 import model.Prodotto;
 import rowmapper.ProductMapper;
 import java.sql.SQLException;
@@ -82,6 +83,22 @@ public class ProductDAOImplementation implements ProductDAO {
         Object[] params = builder.getParameters();
         update(sql, params);
     }
+
+    @Override
+    public void updateStock(List<DettaglioOrdine> orderDetails) throws RuntimeException {
+         db.execute_transaction(() -> {
+            for (DettaglioOrdine detail : orderDetails) {
+                String sql = "UPDATE PRODUCT SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?";
+                try {
+                     db.execute_query(sql, mapper, detail.getQuantity(), detail.getProduct_id(), detail.getQuantity());
+                }catch (Exception e) {
+                    throw new RuntimeException("Stock insufficiente per il prodotto ID: " + detail.getProduct_id());
+                }
+            }
+             return null;
+         });
+    }
+
 
     private void update(String sql, Object... params) {
         db.execute_query(sql, mapper, params);

@@ -2,6 +2,7 @@ package ui;
 
 import db.OrdineDAOImplementation;
 import db.ProductDAOImplementation;
+import model.DettaglioOrdine;
 import model.Ordine;
 import model.Prodotto;
 import model.enums.DeliveryStatus;
@@ -14,6 +15,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -264,8 +267,15 @@ public class OrdiniPanel extends JPanel {
 
         int orderId = getSelectedOrderId(orderTable);
         ordineDAO.updateDeliveryStatus(orderId, DeliveryStatus.SHIPPED);
-        System.out.println("L'ordine è stato gestito con successo.");
-        loadData();
+
+        try {
+            prodottoDAO.updateStock(ordineMap.get(orderId).getDetails());
+            System.out.println("L'ordine è stato gestito con successo.");
+        }catch (RuntimeException exception) {
+            mostraErrore(exception.getCause().getMessage());
+        }finally {
+            loadData();
+        }
     }
 
     private void mostraErrore(String messaggio) {
