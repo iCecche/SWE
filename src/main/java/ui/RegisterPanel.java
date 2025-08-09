@@ -1,5 +1,9 @@
 package ui;
 
+import db.UserDAOImplementation;
+import model.User;
+import model.enums.UserRole;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,11 +12,17 @@ public class RegisterPanel extends JFrame {
     private JLabel username_label;
     private JLabel password_label;
     private JLabel confirm_password_label;
+    private JLabel nome_label;
+    private JLabel cognome_label;
     private JTextField username_field;
     private JPasswordField password_field;
     private JPasswordField confirm_password_field;
+    private JTextField nome_field;
+    private JTextField cognome_field;
     private JButton register_button;
     private JButton login_button;
+
+    private UserDAOImplementation userDAO;
 
     public RegisterPanel() {
         setTitle("📝 Register Page");
@@ -66,9 +76,32 @@ public class RegisterPanel extends JFrame {
         confirm_password_field.setBorder(BorderFactory.createCompoundBorder(confirm_password_field.getBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         add(confirm_password_field);
 
+        // --- Nome e Cognome ---
+        nome_label = new JLabel("Username:");
+        nome_label.setBounds(100, 300, 100, 30);
+        add(nome_label);
+
+        nome_field = new JTextField();
+        nome_field.setBounds(215, 300, 200, 30);
+        nome_field.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
+        nome_field.setBorder(BorderFactory.createCompoundBorder(nome_field.getBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        nome_field.setEditable(true);
+        add(nome_field);
+
+        cognome_label = new JLabel("Cognome:");
+        cognome_label.setBounds(100, 350, 100, 30);
+        add(cognome_label);
+
+        cognome_field = new JTextField();
+        cognome_field.setBounds(215, 350, 200, 30);
+        cognome_field.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
+        cognome_field.setBorder(BorderFactory.createCompoundBorder(cognome_field.getBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        cognome_field.setEditable(true);
+        add(cognome_field);
+
         // --- Buttons ---
         register_button = new JButton("Register");
-        register_button.setBounds(275, 320, 100, 30);
+        register_button.setBounds(275, 420, 100, 30);
         register_button.setOpaque(true);
         register_button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
         register_button.setBackground(new Color(0, 149, 255));
@@ -76,7 +109,7 @@ public class RegisterPanel extends JFrame {
         add(register_button);
 
         login_button = new JButton("Login");
-        login_button.setBounds(125, 320, 100, 30);
+        login_button.setBounds(125, 420, 100, 30);
         login_button.setOpaque(true);
         login_button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
         add(login_button);
@@ -98,6 +131,8 @@ public class RegisterPanel extends JFrame {
         String username = username_field.getText().trim();
         String password = new String(password_field.getPassword());
         String confirmPassword = new String(confirm_password_field.getPassword());
+        String nome = nome_field.getText().trim();
+        String cognome = cognome_field.getText().trim();
 
         if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Compila tutti i campi.", "Errore", JOptionPane.ERROR_MESSAGE);
@@ -109,10 +144,17 @@ public class RegisterPanel extends JFrame {
             return;
         }
 
-        // Qui va il collegamento con il tuo UserDAO
-        boolean success = true; // placeholder
+        userDAO = new UserDAOImplementation();
+        User user = userDAO.searchByUsername(username);
 
-        if (success) {
+        if(user != null) {
+            JOptionPane.showMessageDialog(this, "Utente già registrato", "Errore", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Long new_user_id = userDAO.newUser(username, password, UserRole.USER, nome, cognome);
+
+        if (new_user_id != null) {
             JOptionPane.showMessageDialog(this, "Registrazione completata!", "Successo", JOptionPane.INFORMATION_MESSAGE);
             dispose();
             new LoginPanel().setVisible(true);
