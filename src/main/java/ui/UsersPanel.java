@@ -58,7 +58,7 @@ public class UsersPanel extends JPanel {
         configurePanelLayout();
 
         // Tabella
-        modello = createTableModel(new String[]{"ID", "Username", "Nome", "Cognome", "Indirizzo", "Cap", "Provincia", "Stato"});
+        modello = createTableModel(new String[]{"ID", "Username", "Nome", "Cognome", "Indirizzo", "Cap", "Provincia", "Stato", "Role"});
         tabella = new JTable(modello);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
@@ -185,6 +185,7 @@ public class UsersPanel extends JPanel {
         role = toggleRole(role);
 
         userDAO.UpdateRole(user.getId(), role);
+        loadData();
     }
 
     private UserRole toggleRole(UserRole role) {
@@ -232,7 +233,7 @@ public class UsersPanel extends JPanel {
     }
 
     private void addUserToTable(User user) {
-        Object[] rowData = new Object[]{user.getId(), user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato()};
+        Object[] rowData = new Object[]{user.getId(), user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato(), user.getRole()};
         modello.addRow(rowData);
     }
 }
