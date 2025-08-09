@@ -88,23 +88,9 @@ class ProductDAOIntegrationTest {
 
     @Test
     void deleteProduct() {
-        // check products quantity and retrieve product to be deleted
-        List<Prodotto> products = productDAO.searchAll();
-        Prodotto product = products.getLast();
+        productDAO.deleteProduct(10);
 
-        assertEquals(10, products.size());
-        assertNotNull(product);
-        assertEquals(10, product.getId());
-
-        // FIXME: gestire cancellazione prodotto ( se presente in ordini c'è problema ) -> flag su main.db 'is_deleted' invece di cancellazione oppure set null?
-
-        // delete product
-        //productDAO.deleteProduct(10);
-
-        // check list to confirm deletion
-        //List<Prodotto> remaining_products = productDAO.searchAll();
-
-        //assertEquals(9, remaining_products.size());
-        //assertFalse(products.contains(product));
+        Prodotto product = productDAO.searchById(10);
+        assertTrue(product.isDeleted());
     }
 }

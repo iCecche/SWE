@@ -43,8 +43,8 @@ class UserDAOImplementationTest {
 
     @Test
     void searchAll() {
-        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato");
-        User user2 = new User(2, "username2", "password2", UserRole.ADMIN, "nome2", "cognome2", "indirizzo2", "cap2", "provincia2", "stato2");
+        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato", false);
+        User user2 = new User(2, "username2", "password2", UserRole.ADMIN, "nome2", "cognome2", "indirizzo2", "cap2", "provincia2", "stato2", false);
         Object[] params = new Object[0];
 
         // Configura il comportamento del mock
@@ -64,7 +64,7 @@ class UserDAOImplementationTest {
 
     @Test
     void searchById() {
-        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato");
+        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato", false);
 
         // Configura comportamento del mock
         QueryResult<User> expectedResult = QueryResult.ofSelect(List.of(user1));
@@ -82,7 +82,7 @@ class UserDAOImplementationTest {
 
     @Test
     void searchByUsername() {
-        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato");
+        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato", false);
 
         // Configura il comportamento del mock
         QueryResult<User> expectedResult = QueryResult.ofSelect(List.of(user1));
@@ -100,8 +100,8 @@ class UserDAOImplementationTest {
 
     @Test
     void searchUsersInfo() {
-        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato");
-        User user2 = new User(2, "username2", "password2", UserRole.ADMIN, "nome2", "cognome2", "indirizzo2", "cap2", "provincia2", "stato2");
+        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato", false);
+        User user2 = new User(2, "username2", "password2", UserRole.ADMIN, "nome2", "cognome2", "indirizzo2", "cap2", "provincia2", "stato2", false);
         Object[] params = new Object[0];
 
         // Configura comportamento del mock
@@ -121,7 +121,7 @@ class UserDAOImplementationTest {
 
     @Test
     void searchUserInfoById() {
-        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato");
+        User user1 = new User(1, "username", "password", UserRole.USER, "nome", "cognome", "indirizzo", "cap", "provincia", "stato", false);
 
         // Configura comportamento del mock
         QueryResult<User> expectedResult = QueryResult.ofSelect(List.of(user1));

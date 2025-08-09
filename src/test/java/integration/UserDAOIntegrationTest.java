@@ -213,7 +213,8 @@ public class UserDAOIntegrationTest {
     void deleteUser() {
         userDAO.deleteUser(10);
         User user = userDAO.searchById(10);
-        assertNull(user);
+
+        assertTrue(user.isDeleted());
     }
 
     @Test
