@@ -17,7 +17,6 @@ public interface ProductDAO {
 
     // Update
     void updateProduct(int id, String name, String description, Integer price, Integer stock);
-    void updateStock(List<DettaglioOrdine> orderDetails) throws RuntimeException;
 
     // Delete
     void deleteProduct(int id);

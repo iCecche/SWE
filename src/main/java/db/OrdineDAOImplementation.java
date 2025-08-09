@@ -61,11 +61,12 @@ public class OrdineDAOImplementation implements OrdineDAO {
     @Override
     public Long insertNewOrder(Ordine order) {
         return db.execute_transaction(() -> {
-            Long newOrderId = newOrder(order.getUser_id(), order.getDate(), order.getDeliveryStatus(), order.getPaymentStatus());
+            Long new_order_id = newOrder(order.getUser_id(), order.getDate(), order.getDeliveryStatus(), order.getPaymentStatus());
+            updateStock(order.getDetails());
             for(DettaglioOrdine detail : order.getDetails()) {
-                newOrderDetail(newOrderId, detail.getProduct_id(), detail.getQuantity()); //fixme: posso rimuovere orderId da DettaglioOrdine dato che adesso sono inclusi in Obj di tipo Ordine
+                newOrderDetail(new_order_id, detail.getProduct_id(), detail.getQuantity()); //fixme: posso rimuovere orderId da DettaglioOrdine dato che adesso sono inclusi in Obj di tipo Ordine
             }
-            return newOrderId;
+            return new_order_id;
         });
     }
 
@@ -97,6 +98,17 @@ public class OrdineDAOImplementation implements OrdineDAO {
         String sql = builder.getQuery();
         Object[] params = builder.getParameters();
         db.execute_query(sql, mapper, params);
+    }
+
+    private void updateStock(List<DettaglioOrdine> orderDetails) {
+        String sql = "UPDATE PRODUCT SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?";
+        for ( DettaglioOrdine detail : orderDetails) {
+            try {
+                db.execute_query(sql, mapper, detail.getQuantity(), detail.getProduct_id(), detail.getQuantity());
+            }catch (Exception e) {
+                throw new RuntimeException("Stock insufficiente per il prodotto ID: " + detail.getProduct_id());
+            }
+        }
     }
 
     @Override

@@ -161,12 +161,17 @@ public class CartPanel extends JPanel {
             }
 
             Ordine ordine = builder.build();
-            ordineDAO.insertNewOrder(ordine);
-
-            if (isAdmin)
-                setContent(new OrdiniPanel(), getParent());
-            else
-                setContent(new OrdiniPanel(userId), getParent());
+            try {
+                ordineDAO.insertNewOrder(ordine);
+                System.out.println("Ordine inserito con successo");
+            }catch (Exception exception) {
+                mostraErrore(exception.getCause().getMessage());
+            }finally {
+                if (isAdmin)
+                    setContent(new OrdiniPanel(), getParent());
+                else
+                    setContent(new OrdiniPanel(userId), getParent());
+            }
         }
     }
 
@@ -186,5 +191,9 @@ public class CartPanel extends JPanel {
         parent.add(comp, BorderLayout.CENTER);
         parent.revalidate();
         parent.repaint();
+    }
+
+    private void mostraErrore(String messaggio) {
+        JOptionPane.showMessageDialog(this, messaggio);
     }
 }

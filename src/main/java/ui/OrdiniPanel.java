@@ -268,14 +268,8 @@ public class OrdiniPanel extends JPanel {
         int orderId = getSelectedOrderId(orderTable);
         ordineDAO.updateDeliveryStatus(orderId, DeliveryStatus.SHIPPED);
 
-        try {
-            prodottoDAO.updateStock(ordineMap.get(orderId).getDetails());
-            System.out.println("L'ordine è stato gestito con successo.");
-        }catch (RuntimeException exception) {
-            mostraErrore(exception.getCause().getMessage());
-        }finally {
-            loadData();
-        }
+        System.out.println("L'ordine è stato gestito con successo.");
+        loadData();
     }
 
     private void mostraErrore(String messaggio) {
