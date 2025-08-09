@@ -96,7 +96,7 @@ public class LoginPanel extends JFrame {
 
         // USER AUTHENTICATION
         User user = userDAO.searchByUsername(username);
-        if (user == null) {
+        if (user == null || user.isDeleted()) {
             JOptionPane.showMessageDialog(this, "Utente non registrato.", "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }

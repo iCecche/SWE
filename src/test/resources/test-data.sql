@@ -1,13 +1,13 @@
 INSERT INTO USERS (USERNAME, PASSWORD, ROLE) VALUES
-    ('alessiaceccherini03@gmail.com', '$2a$12$jzfpOqxEFWLahwMGFqlua.anSojWt7x/IMB1mQ/FRch9ReVZdoN8m', 'USER'),
-    ('user1@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
-    ('user2@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
-    ('user3@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
-    ('user4@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
-    ('user5@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
-    ('user6@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
-    ('user7@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
-    ('user8@gmail.com', '$2b$12$0mRvM2iS9dqfr8A6YstWdOhR16gxJV97F73dL2RlK4.f8.akXiC7W', 'USER'),
+    ('user1', 'user1', 'USER'),
+    ('user2', 'user2', 'USER'),
+    ('user3', 'user3', 'USER'),
+    ('user4', 'user4', 'USER'),
+    ('user5', 'user5', 'USER'),
+    ('user6', 'user6', 'USER'),
+    ('user7', 'user7', 'USER'),
+    ('user8', 'user8', 'USER'),
+    ('user9', 'user9', 'USER'),
     ('admin', 'admin', 'ADMIN');
 
 INSERT INTO USER_INFO (id, nome, cognome, indirizzo, cap, provincia, stato) VALUES

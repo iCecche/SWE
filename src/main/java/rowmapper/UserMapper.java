@@ -64,6 +64,11 @@ public class UserMapper extends RowMapper<User> {
             builder.withStato(stato);
         }
 
+        if(contains(rs, "is_deleted")) {
+            boolean is_deleted = rs.getBoolean("is_deleted");
+            builder.withDeleted(is_deleted);
+        }
+
         return builder.build();
     }
 }

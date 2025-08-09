@@ -184,7 +184,8 @@ public class UserDAOImplementation implements UserDAO{
     @Override
     public void deleteUser(int id) {
         builder = QueryBuilder.create();
-        builder.deleteFrom("USERS")
+        builder.update("USERS")
+                .set("is_deleted", true)
                 .where("id = ?")
                 .addParameter(id);
 

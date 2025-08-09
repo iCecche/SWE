@@ -41,7 +41,7 @@ public class UsersPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     int row = tabella.getSelectedRow();
-                    if (row != -1) {
+                    if (row != -1 && !tabella.getValueAt(row, 9).equals(true)) {  // se riga selezionata e utente non eliminato
                         int userId = getSelectedUserId(row);
                         onUserSelected.accept(userId);
                     }
@@ -58,7 +58,7 @@ public class UsersPanel extends JPanel {
         configurePanelLayout();
 
         // Tabella
-        modello = createTableModel(new String[]{"ID", "Username", "Nome", "Cognome", "Indirizzo", "Cap", "Provincia", "Stato", "Role"});
+        modello = createTableModel(new String[]{"ID", "Username", "Nome", "Cognome", "Indirizzo", "Cap", "Provincia", "Stato", "Role", "Deleted"});
         tabella = new JTable(modello);
         add(new JScrollPane(tabella), BorderLayout.CENTER);
 
@@ -164,13 +164,18 @@ public class UsersPanel extends JPanel {
     }
 
     private void onDelete(ActionEvent e) {
-        int selected = tabella.getSelectedRow();
-        if (selected == -1) {
-            mostraErrore("Seleziona un utente.");
+        User user = getUserFromTable();
+
+        if(user == null) {
+            mostraErrore("Utente non trovato.");
             return;
         }
-        int id = getSelectedUserId(selected);
-        userDAO.deleteUser(id);
+        if(user.isDeleted()) {
+            mostraErrore("Utente già eliminato");
+            return;
+        }
+
+        userDAO.deleteUser(user.getId());
         loadData();
     }
 
@@ -233,7 +238,7 @@ public class UsersPanel extends JPanel {
     }
 
     private void addUserToTable(User user) {
-        Object[] rowData = new Object[]{user.getId(), user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato(), user.getRole()};
+        Object[] rowData = new Object[]{user.getId(), user.getUsername(), user.getNome(), user.getCognome(), user.getIndirizzo(), user.getCap(), user.getProvincia(), user.getStato(), user.getRole(), user.isDeleted()};
         modello.addRow(rowData);
     }
 }

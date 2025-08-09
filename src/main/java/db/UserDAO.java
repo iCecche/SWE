@@ -22,7 +22,7 @@ public interface UserDAO{
     void UpdateRole(int id, UserRole role);
     void UpdateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato);
 
-    // Delete
+    // Delete - soft delete
     void deleteUser(int id);
 
 }

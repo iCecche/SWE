@@ -13,6 +13,7 @@ public class UserBuilder {
     private String cap;
     private String provincia;
     private String stato;
+    private boolean is_deleted;
 
     private UserBuilder() {};
 
@@ -60,7 +61,9 @@ public class UserBuilder {
         this.stato = stato;
     }
 
+    public void withDeleted(boolean is_deleted) { this.is_deleted = is_deleted; }
+
     public User build() {
-        return new User(id, username, password, role, nome, cognome, indirizzo, cap, provincia, stato);
+        return new User(id, username, password, role, nome, cognome, indirizzo, cap, provincia, stato, is_deleted);
     }
 }

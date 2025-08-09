@@ -14,16 +14,18 @@ public class User {
     private String cap;
     private String provincia;
     private String stato;
+    private boolean is_deleted;
 
-    private User(int id, String username, String password, UserRole role) {
+    private User(int id, String username, String password, UserRole role, boolean is_deleted) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
+        this.is_deleted = is_deleted;
     }
 
-    public User(int id, String username, String password, UserRole role, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
-        this(id, username, password, role);
+    public User(int id, String username, String password, UserRole role, String nome, String cognome, String indirizzo, String cap, String provincia, String stato, boolean is_deleted) {
+        this(id, username, password, role, is_deleted);
         this.nome = nome;
         this.cognome = cognome;
         this.indirizzo = indirizzo;
@@ -78,6 +80,8 @@ public class User {
     public String getStato() {
         return stato;
     }
+
+    public boolean isDeleted() { return is_deleted; }
 
     public void print() {
         System.out.println("ID: " + id);
