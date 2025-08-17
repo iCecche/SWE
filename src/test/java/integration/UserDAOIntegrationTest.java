@@ -5,7 +5,8 @@ import db.UserDAOImplementation;
 import model.User;
 import model.UserBuilder;
 import model.enums.UserRole;
-import org.junit.jupiter.api.AfterEach;
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,19 +20,28 @@ public class UserDAOIntegrationTest {
 
     private UserDAOImplementation userDAO;
     private static PostgreSQLContainer<?> postgres;
+    private static Flyway flyway;
 
     @BeforeAll
     static void initDB() {
         postgres = new PostgreSQLContainer<>("postgres:16-alpine")
                 .withDatabaseName("test_db")
                 .withUsername("user_test")
-                .withPassword("password_test")
-                .withInitScript("init.sql");
+                .withPassword("password_test");
+
+        postgres.start();
+
+        flyway = Flyway.configure()
+                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+                .locations("classpath:db/migration") // dove tieni gli script SQL
+                .cleanDisabled(false)
+                .load();
     }
 
     @BeforeEach
     void setUp() {
-        postgres.start();
+        flyway.clean();
+        flyway.migrate();
 
         final String jdbcURL = postgres.getJdbcUrl();
         final String jdbcUsername = postgres.getUsername();
@@ -42,8 +52,8 @@ public class UserDAOIntegrationTest {
         userDAO = new UserDAOImplementation(db);
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    static void tearDown() {
         postgres.close();
     }
 

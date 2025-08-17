@@ -7,7 +7,11 @@ import model.Ordine;
 import model.OrdineBuilder;
 import model.enums.DeliveryStatus;
 import model.enums.PaymentStatus;
-import org.junit.jupiter.api.*;
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,19 +27,28 @@ public class OrdineDAOIntegrationTest {
 
     private static OrdineDAOImplementation ordineDAO;
     private static PostgreSQLContainer<?> postgres;
+    private static Flyway flyway;
 
     @BeforeAll
     static void initDB() {
         postgres = new PostgreSQLContainer<>("postgres:16-alpine")
                 .withDatabaseName("test_db")
                 .withUsername("user_test")
-                .withPassword("password_test")
-                .withInitScript("init.sql");
+                .withPassword("password_test");
+
+        postgres.start();
+
+        flyway = Flyway.configure()
+                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+                .locations("classpath:db/migration") // dove tieni gli script SQL
+                .cleanDisabled(false)
+                .load();
     }
 
     @BeforeEach
     void setUp() {
-        postgres.start();
+        flyway.clean();
+        flyway.migrate();
 
         final String jdbcURL = postgres.getJdbcUrl();
         final String jdbcUsername = postgres.getUsername();
@@ -46,8 +59,8 @@ public class OrdineDAOIntegrationTest {
         ordineDAO = new OrdineDAOImplementation(db);
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    static void tearDown() {
         postgres.close();
     }
 
