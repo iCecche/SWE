@@ -1,5 +1,5 @@
 import javax.swing.*;
-import ui.LoginPanel;
+import ui.panels.LoginPanel;
 
 public class Main {
     public static void main(String[] args) {

@@ -87,6 +87,20 @@ public class UserDAOImplementation implements UserDAO{
         return search(sql, params).getSingleResult().orElse(null);
     }
 
+    @Override
+    public User searchUserInfoByUsername(String username) {
+        builder = QueryBuilder.create();
+        builder.select()
+                .from("USERS")
+                .leftJoin("USER_INFO", "USERS.id = USER_INFO.ID")
+                .where("USERS.username = ?")
+                .addParameter(username);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        return search(sql, params).getSingleResult().orElse(null);
+    }
+
     private QueryResult<User> search(String sql, Object... params) {
         return db.execute_query(sql, mapper, params);
     }

@@ -1,8 +1,8 @@
-package ui;
+package ui.panels;
 
 import db.UserDAOImplementation;
 import model.User;
-import model.enums.UserRole;
+import ui.UIFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,41 +20,42 @@ public class LoginPanel extends JFrame {
     private UserDAOImplementation userDAO;
 
     public LoginPanel() {
-        // TODO: place custom component creation code here
+        initializeComponents();
+        setupLayout();
+        setupEventListeners();
+        setVisible(true);
+    }
 
+    private void initializeComponents() {
         login_page_label = new JLabel("Login Page");
         login_page_label.setBounds(215, 75, 100, 20);
         login_page_label.setFont(login_page_label.getFont().deriveFont(Font.BOLD, 14));
-        add(login_page_label);
 
         username_label = new JLabel("Username:");
         username_label.setBounds(100, 150, 100, 30);
-        add(username_label);
 
         username_field = new JTextField();
         username_field.setBounds(215, 150, 200, 30);
         username_field.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
-        username_field.setBorder(BorderFactory.createCompoundBorder(username_field.getBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        username_field.setBorder(BorderFactory.createCompoundBorder(
+                username_field.getBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         username_field.setEditable(true);
-        add(username_field);
 
         password_label = new JLabel("Password:");
         password_label.setBounds(100, 200, 100, 30);
-        add(password_label);
 
         password_field = new JPasswordField();
         password_field.setBounds(215, 200, 200, 30);
         password_field.setEditable(true);
         password_field.setEchoChar('*');
         password_field.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
-        password_field.setBorder(BorderFactory.createCompoundBorder(password_field.getBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-        add(password_field);
+        password_field.setBorder(BorderFactory.createCompoundBorder(
+                password_field.getBorder(), BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
         register_button = new JButton("Register");
         register_button.setBounds(125, 300, 100, 30);
         register_button.setOpaque(true);
         register_button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
-        add(register_button);
 
         login_button = new JButton("Login");
         login_button.setBounds(275, 300, 100, 30);
@@ -62,25 +63,32 @@ public class LoginPanel extends JFrame {
         login_button.setOpaque(true);
         login_button.setForeground(Color.WHITE);
         login_button.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1, true));
-        add(login_button);
+    }
 
+    private void setupLayout() {
+        setTitle(" Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-        pack();
+        setLayout(null);
         setSize(500, 500);
         setLocationRelativeTo(null);
         setResizable(false);
-        setVisible(true);
 
-        // --- Login Action ---
+        add(login_page_label);
+        add(username_label);
+        add(username_field);
+        add(password_label);
+        add(password_field);
+        add(register_button);
+        add(login_button);
+    }
+
+    private void setupEventListeners() {
         login_button.addActionListener(e -> performLogin());
-        // ENTER key triggers login
-        password_field.addActionListener(e -> performLogin());
+        password_field.addActionListener(e -> performLogin()); // ENTER key triggers login
 
-        // --- Register Action ---
         register_button.addActionListener(e -> {
-            dispose(); // chiude la finestra login
-            new RegisterPanel().setVisible(true); // mostra register
+            dispose();
+            new RegisterPanel();
         });
     }
 
@@ -90,33 +98,33 @@ public class LoginPanel extends JFrame {
         String pass = new String(password_field.getPassword());
 
         if (username.isEmpty() || pass.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Inserisci username e password.", "Errore", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Inserisci username e password.",
+                    "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // USER AUTHENTICATION
+        // User authentication
         User user = userDAO.searchByUsername(username);
         if (user == null || user.isDeleted()) {
-            JOptionPane.showMessageDialog(this, "Utente non registrato.", "Errore", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Utente non registrato.",
+                    "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         if (!user.getPassword().equals(pass)) {
-            JOptionPane.showMessageDialog(this, "Password errata.", "Errore", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Password errata.",
+                    "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // IF AUTHENTICATION SUCCEEDS, OPEN DASHBOARD
-        JOptionPane.showMessageDialog(this, "Login effettuato!", "Successo", JOptionPane.INFORMATION_MESSAGE);
+        // If authentication succeeds, open appropriate dashboard
+        JOptionPane.showMessageDialog(this, "Login effettuato!",
+                "Successo", JOptionPane.INFORMATION_MESSAGE);
         openDashboard(user);
     }
 
     private void openDashboard(User user) {
-        dispose(); // chiude la finestra login
-        if (user.getRole().equals(UserRole.ADMIN)) {
-            new AdminDashboard().setVisible(true);
-        }else {
-            new UserDashboard(user).setVisible(true);
-        }
+        dispose();
+        UIFactory.createDashboard(user);
     }
 }

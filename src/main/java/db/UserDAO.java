@@ -13,6 +13,7 @@ public interface UserDAO{
     User searchByUsername(String username);
     List<User> searchUsersInfo();
     User searchUserInfoById(int id);
+    User searchUserInfoByUsername(String username);
 
     // Insert
     Long newUser(String username, String password, UserRole role, String nome, String cognome);
