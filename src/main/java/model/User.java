@@ -16,7 +16,7 @@ public class User {
     private String stato;
     private boolean is_deleted;
 
-    private User(int id, String username, String password, UserRole role, boolean is_deleted) {
+    public User(int id, String username, String password, UserRole role, boolean is_deleted) {
         this.id = id;
         this.username = username;
         this.password = password;

@@ -1,9 +1,7 @@
-package db;
+package orm;
 
-import model.DettaglioOrdine;
 import model.Prodotto;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface ProductDAO {

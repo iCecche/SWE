@@ -1,10 +1,13 @@
 package ui.panels;
 
-import db.OrdineDAOImplementation;
-import db.ProductDAOImplementation;
+import model.Prodotto;
+import orm.OrdineDAOImplementation;
+import orm.ProductDAOImplementation;
 import model.Ordine;
 import model.enums.DeliveryStatus;
 import model.enums.PaymentStatus;
+import services.OrderService;
+import services.ProductService;
 import ui.base.UIContext;
 import ui.base.BasePanel;
 
@@ -25,8 +28,8 @@ public class OrdiniPanel extends BasePanel {
     private JTable detailTable;
     private DefaultTableModel orderModel;
     private DefaultTableModel detailModel;
-    private OrdineDAOImplementation ordineDAO;
-    private ProductDAOImplementation prodottoDAO;
+    private OrderService orderService;
+    private ProductService productService;
 
     public OrdiniPanel(UIContext uiContext) {
         super(uiContext);
@@ -34,8 +37,8 @@ public class OrdiniPanel extends BasePanel {
 
     @Override
     protected void initializeComponents() {
-        this.ordineDAO = new OrdineDAOImplementation();
-        this.prodottoDAO = new ProductDAOImplementation();
+        this.orderService = new OrderService();
+        this.productService = new ProductService();
         this.ordineMap = new HashMap<>();
 
         // Create table models with appropriate columns based on permissions
@@ -93,7 +96,7 @@ public class OrdiniPanel extends BasePanel {
             Ordine ordine = ordineMap.get(orderId);
             if (ordine != null) {
                 ordine.getDetails().forEach(detail -> {
-                    var prodotto = prodottoDAO.searchById(detail.getProduct_id());
+                    Prodotto prodotto = productService.getProductById(detail.getProduct_id());
                     detailModel.addRow(new Object[]{
                             prodotto.getId(), prodotto.getName(), prodotto.getDescription(),
                             prodotto.getPrice(), detail.getQuantity(), prodotto.isDeleted()
@@ -154,7 +157,7 @@ public class OrdiniPanel extends BasePanel {
     private void handleDeleteOrder(ActionEvent e) {
         int orderId = getSelectedRowId(orderTable);
         if (orderId != -1 && confirmAction("Sei sicuro di voler eliminare questo ordine?")) {
-            ordineDAO.deleteOrder(orderId);
+            orderService.deleteOrder(orderId);
             loadData();
             showInfo("Ordine eliminato con successo.");
         }
@@ -174,7 +177,7 @@ public class OrdiniPanel extends BasePanel {
 
         int orderId = getSelectedRowId(orderTable);
         if (orderId != -1) {
-            ordineDAO.updatePaymentStatus(orderId, PaymentStatus.PAID);
+            orderService.updatePaymentStatus(orderId, PaymentStatus.PAID);
             loadData();
             showInfo("Pagamento effettuato con successo.");
         }
@@ -193,9 +196,17 @@ public class OrdiniPanel extends BasePanel {
             return;
         }
 
+        int paymentStatusCol = getPaymentStatusColumnIndex();
+        String paymentStatus = (String) orderTable.getValueAt(selectedRow, paymentStatusCol);
+        PaymentStatus payment = PaymentStatus.fromString(paymentStatus);
+
+        if (payment != PaymentStatus.PAID) {
+            showError("L'ordine deve prima essere pagato.");
+        }
+
         int orderId = getSelectedRowId(orderTable);
         if (orderId != -1 && confirmAction("Confermi la spedizione dell'ordine?")) {
-            ordineDAO.updateDeliveryStatus(orderId, DeliveryStatus.SHIPPED);
+            orderService.updateDeliveryStatus(orderId, DeliveryStatus.SHIPPED);
             loadData();
             showInfo("Ordine spedito con successo.");
         }
@@ -249,8 +260,8 @@ public class OrdiniPanel extends BasePanel {
         ordineMap.clear();
 
         List<Ordine> ordini = uiContext.getPermissionStrategy().canViewAllOrders()
-                ? ordineDAO.searchAll()
-                : ordineDAO.searchByUserID(uiContext.getUserId());
+                ? orderService.getOrders()
+                : orderService.getOrdersByUserID(uiContext.getUserId());
 
         ordini.forEach(this::addOrderToTable);
     }

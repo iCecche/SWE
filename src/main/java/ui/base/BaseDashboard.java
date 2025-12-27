@@ -26,7 +26,7 @@ public abstract class BaseDashboard extends JFrame {
 
     private void initializeFrame() {
         setTitle("📦 Dashboard Magazzino - " + getRoleTitle());
-        setSize(900, 600);
+        setSize(1200, 800);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);

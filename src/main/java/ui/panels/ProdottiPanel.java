@@ -1,7 +1,8 @@
 package ui.panels;
 
-import db.ProductDAOImplementation;
+import orm.ProductDAOImplementation;
 import model.Prodotto;
+import services.ProductService;
 import ui.dialogs.Dialog;
 import ui.base.BasePanel;
 import ui.base.UIContext;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class ProdottiPanel extends BasePanel {
     private JTable tabella;
     private DefaultTableModel modello;
-    private ProductDAOImplementation prodottoDAO;
+    private ProductService productService;
 
     public ProdottiPanel(UIContext uiContext) {
         super(uiContext);
@@ -25,7 +26,7 @@ public class ProdottiPanel extends BasePanel {
 
     @Override
     protected void initializeComponents() {
-        this.prodottoDAO = new ProductDAOImplementation();
+        this.productService = new ProductService();
 
         String[] columns = uiContext.getPermissionStrategy().getProductTableColumns();
         modello = createNonEditableTableModel(columns);
@@ -66,7 +67,7 @@ public class ProdottiPanel extends BasePanel {
         new Dialog(null, "Aggiungi Prodotto", campi, valoriInseriti -> {
             try {
                 Prodotto nuovoProdotto = getProdottoFromInput(valoriInseriti);
-                prodottoDAO.insertNewProduct(
+                productService.insertNewProduct(
                         nuovoProdotto.getName(),
                         nuovoProdotto.getDescription(),
                         nuovoProdotto.getPrice(),
@@ -84,7 +85,7 @@ public class ProdottiPanel extends BasePanel {
         int id = getSelectedRowId(tabella);
         if (id == -1) return;
 
-        Prodotto prod = prodottoDAO.searchById(id);
+        Prodotto prod = productService.getProductById(id);
         if (prod == null) {
             showError("Prodotto non trovato.");
             return;
@@ -95,7 +96,7 @@ public class ProdottiPanel extends BasePanel {
         new Dialog(null, "Modifica Prodotto", campi, valoriInseriti -> {
             try {
                 Prodotto aggiornato = getProdottoFromInput(valoriInseriti);
-                prodottoDAO.updateProduct(id,
+                productService.updateProduct(id,
                         aggiornato.getName(),
                         aggiornato.getDescription(),
                         aggiornato.getPrice(),
@@ -124,7 +125,7 @@ public class ProdottiPanel extends BasePanel {
         }
 
         if (confirmAction("Sei sicuro di voler eliminare questo prodotto?")) {
-            prodottoDAO.deleteProduct(id);
+            productService.deleteProduct(id);
             loadData();
             showInfo("Prodotto eliminato con successo!");
         }
@@ -152,7 +153,7 @@ public class ProdottiPanel extends BasePanel {
     protected void loadData() {
         modello.setRowCount(0);
 
-        List<Prodotto> prodotti = prodottoDAO.searchAll();
+        List<Prodotto> prodotti = productService.getAllProducts();
         prodotti.forEach(this::addProductToTable);
     }
 

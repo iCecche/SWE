@@ -1,4 +1,4 @@
-package db;
+package orm;
 
 import model.User;
 import model.enums.UserRole;

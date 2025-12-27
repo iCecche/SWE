@@ -1,4 +1,4 @@
-package db;
+package orm;
 
 import java.util.Collections;
 import java.util.List;

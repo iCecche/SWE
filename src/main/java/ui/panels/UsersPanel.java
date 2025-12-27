@@ -1,8 +1,9 @@
 package ui.panels;
 
-import db.UserDAOImplementation;
+import orm.UserDAOImplementation;
 import model.User;
 import model.enums.UserRole;
+import services.UserService;
 import ui.base.BasePanel;
 import ui.base.UIContext;
 import ui.dialogs.UserFormDialog;
@@ -30,7 +31,7 @@ public class UsersPanel extends BasePanel {
 
     private JTable userTable;
     private DefaultTableModel tableModel;
-    private UserDAOImplementation userDAO;
+    private UserService userService;
 
     // Factory methods for different use cases
     public static UsersPanel createAdminUsersView(UIContext uiContext) {
@@ -68,7 +69,7 @@ public class UsersPanel extends BasePanel {
 
     @Override
     protected void initializeComponents() {
-        this.userDAO = new UserDAOImplementation();
+        this.userService = new UserService();
 
         // Now config is guaranteed to be initialized
         String[] columns = getAppropriateColumns();
@@ -188,7 +189,7 @@ public class UsersPanel extends BasePanel {
 
     // Event Handlers
     private void handleAdd() {
-        UserFormDialog.showAddDialog(null, userDAO, this::loadData);
+        UserFormDialog.showAddDialog(null, userService, this::loadData);
     }
 
     private void handleModify() {
@@ -199,7 +200,7 @@ public class UsersPanel extends BasePanel {
             return;
         }
 
-        UserFormDialog.showEditDialog(null, user, userDAO, this::loadData);
+        UserFormDialog.showEditDialog(null, user, userService, this::loadData);
     }
 
     private void handleDelete() {
@@ -211,13 +212,17 @@ public class UsersPanel extends BasePanel {
             return;
         }
 
+        // FIXME: add dao method to return only admin users, search through all admin users and if this user in the
+        //  only one, stop deletion. Needs to be at least one admin user left. Display error message.
+        // use a if statement to check if there is only one admin left
+
         String message = String.format("Sei sicuro di voler eliminare l'utente '%s'?",
                 user.getUsername());
 
         if (!confirmAction(message)) return;
 
         try {
-            userDAO.deleteUser(user.getId());
+            userService.deleteUser(user.getId());
 
             if (isSelfDeletion(user)) {
                 handleSelfDeletion();
@@ -257,7 +262,7 @@ public class UsersPanel extends BasePanel {
         if (!confirmAction(message)) return;
 
         try {
-            userDAO.UpdateRole(user.getId(), newRole);
+            userService.updateRole(user.getId(), newRole);
             loadData();
             showInfo("Ruolo cambiato con successo!");
         } catch (Exception e) {
@@ -274,7 +279,7 @@ public class UsersPanel extends BasePanel {
         }
 
         int userId = getSelectedUserId();
-        User user = userDAO.searchUserInfoById(userId);
+        User user = userService.searchUserInfoById(userId);
 
         if (user == null) {
             showError("Utente non trovato.");
@@ -308,12 +313,12 @@ public class UsersPanel extends BasePanel {
 
     private List<User> getUsersToDisplay() {
         return switch (config.viewMode) {
-            case ADMIN_ALL_USERS -> userDAO.searchUsersInfo();
+            case ADMIN_ALL_USERS -> userService.searchUsersInfo();
             case USER_PROFILE, ADMIN_PROFILE -> {
-                User user = userDAO.searchUserInfoById(config.targetUserId);
+                User user = userService.searchUserInfoById(config.targetUserId);
                 yield user != null ? List.of(user) : List.of();
             }
-            case USER_SELECTION -> userDAO.searchUsersInfo().stream()
+            case USER_SELECTION -> userService.searchUsersInfo().stream()
                     .filter(user -> !user.isDeleted())
                     .toList();
         };

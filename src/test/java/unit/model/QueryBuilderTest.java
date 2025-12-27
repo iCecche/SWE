@@ -1,6 +1,6 @@
 package unit.model;
 
-import db.QueryBuilder;
+import orm.QueryBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

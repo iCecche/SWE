@@ -1,8 +1,8 @@
-package db;
+package orm;
 
 import model.User;
 import model.enums.UserRole;
-import rowmapper.UserMapper;
+import orm.rowmapper.UserMapper;
 
 import java.sql.SQLException;
 import java.util.List;

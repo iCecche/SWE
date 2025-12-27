@@ -1,4 +1,4 @@
-package db;
+package orm;
 
 import model.enums.QueryType;
 

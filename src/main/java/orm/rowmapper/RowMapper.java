@@ -1,4 +1,4 @@
-package rowmapper;
+package orm.rowmapper;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

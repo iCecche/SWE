@@ -1,4 +1,4 @@
-package db;
+package orm;
 
 import model.Ordine;
 import model.enums.DeliveryStatus;
@@ -6,7 +6,7 @@ import model.enums.PaymentStatus;
 
 import java.util.List;
 
-public interface OrdineDAO {
+public interface  OrdineDAO {
 
     // Search
     List<Ordine> searchAll();

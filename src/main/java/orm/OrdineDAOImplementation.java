@@ -1,9 +1,9 @@
-package db;
+package orm;
 import model.Ordine;
 import model.DettaglioOrdine;
 import model.enums.DeliveryStatus;
 import model.enums.PaymentStatus;
-import rowmapper.OrdineMapper;
+import orm.rowmapper.OrdineMapper;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -106,7 +106,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
             try {
                 db.execute_query(sql, mapper, detail.getQuantity(), detail.getProduct_id(), detail.getQuantity());
             }catch (Exception e) {
-                throw new RuntimeException("Stock insufficiente per il prodotto ID: " + detail.getProduct_id());
+                throw new RuntimeException("Stock insufficiente per il prodotto ID( " + detail.getProduct_id() + " )");
             }
         }
     }

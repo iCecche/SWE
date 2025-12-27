@@ -1,6 +1,6 @@
-package db;
+package orm;
 
-import rowmapper.RowMapper;
+import orm.rowmapper.RowMapper;
 
 import java.sql.*;
 import java.util.List;
@@ -61,7 +61,7 @@ public class DBManager {
             else
                 connection = DriverManager.getConnection(jdbcUrl, username, password);
         }catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -69,7 +69,7 @@ public class DBManager {
         try {
             connection.close();
         }catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

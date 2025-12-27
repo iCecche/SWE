@@ -1,7 +1,8 @@
 package ui.panels;
 
-import db.UserDAOImplementation;
+import orm.UserDAOImplementation;
 import model.User;
+import services.AuthService;
 import ui.UIFactory;
 
 import javax.swing.*;
@@ -17,7 +18,7 @@ public class LoginPanel extends JFrame {
     private JButton register_button;
     private JButton login_button;
 
-    private UserDAOImplementation userDAO;
+    private AuthService authService;
 
     public LoginPanel() {
         initializeComponents();
@@ -93,27 +94,22 @@ public class LoginPanel extends JFrame {
     }
 
     private void performLogin() {
-        userDAO = new UserDAOImplementation();
+        authService = new AuthService();
         String username = username_field.getText().trim();
-        String pass = new String(password_field.getPassword());
+        String password = new String(password_field.getPassword());
 
-        if (username.isEmpty() || pass.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Inserisci username e password.",
                     "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // User authentication
-        User user = userDAO.searchByUsername(username);
-        if (user == null || user.isDeleted()) {
-            JOptionPane.showMessageDialog(this, "Utente non registrato.",
-                    "Errore", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (!user.getPassword().equals(pass)) {
-            JOptionPane.showMessageDialog(this, "Password errata.",
-                    "Errore", JOptionPane.ERROR_MESSAGE);
+        User user;
+        try {
+            user = authService.login(username, password);
+        }catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 

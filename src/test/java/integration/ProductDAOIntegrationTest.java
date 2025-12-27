@@ -1,7 +1,7 @@
 package integration;
 
-import db.DBManager;
-import db.ProductDAOImplementation;
+import orm.DBManager;
+import orm.ProductDAOImplementation;
 import model.Prodotto;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
@@ -30,7 +30,7 @@ class ProductDAOIntegrationTest {
 
         flyway = Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-                .locations("classpath:db/migration") // dove tieni gli script SQL
+                .locations("classpath:orm/migration") // dove tieni gli script SQL
                 .cleanDisabled(false)
                 .load();
     }
@@ -101,9 +101,11 @@ class ProductDAOIntegrationTest {
 
     @Test
     void deleteProduct() {
+        assertFalse(productDAO.searchById(10).isDeleted());
         productDAO.deleteProduct(10);
 
         Prodotto product = productDAO.searchById(10);
+        assertNotNull(product);
         assertTrue(product.isDeleted());
     }
 }

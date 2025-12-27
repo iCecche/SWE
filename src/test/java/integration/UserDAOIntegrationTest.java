@@ -1,7 +1,7 @@
 package integration;
 
-import db.DBManager;
-import db.UserDAOImplementation;
+import orm.DBManager;
+import orm.UserDAOImplementation;
 import model.User;
 import model.UserBuilder;
 import model.enums.UserRole;
@@ -33,7 +33,7 @@ public class UserDAOIntegrationTest {
 
         flyway = Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-                .locations("classpath:db/migration") // dove tieni gli script SQL
+                .locations("classpath:orm/migration") // dove tieni gli script SQL
                 .cleanDisabled(false)
                 .load();
     }

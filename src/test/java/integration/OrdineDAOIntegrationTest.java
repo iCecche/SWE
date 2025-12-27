@@ -1,7 +1,7 @@
 package integration;
 
-import db.DBManager;
-import db.OrdineDAOImplementation;
+import orm.DBManager;
+import orm.OrdineDAOImplementation;
 import model.DettaglioOrdine;
 import model.Ordine;
 import model.OrdineBuilder;
@@ -40,7 +40,7 @@ public class OrdineDAOIntegrationTest {
 
         flyway = Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-                .locations("classpath:db/migration") // dove tieni gli script SQL
+                .locations("classpath:orm/migration") // dove tieni gli script SQL
                 .cleanDisabled(false)
                 .load();
     }

@@ -1,8 +1,9 @@
 package ui.panels;
 
-import db.UserDAOImplementation;
+import orm.UserDAOImplementation;
 import model.User;
 import model.enums.UserRole;
+import services.AuthService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +23,7 @@ public class RegisterPanel extends JFrame {
     private JButton register_button;
     private JButton login_button;
 
-    private UserDAOImplementation userDAO;
+    private AuthService authService;
 
     public RegisterPanel() {
         setTitle("📝 Register Page");
@@ -144,22 +145,17 @@ public class RegisterPanel extends JFrame {
             return;
         }
 
-        userDAO = new UserDAOImplementation();
-        User user = userDAO.searchByUsername(username);
+        authService = new AuthService();
 
-        if(user != null) {
-            JOptionPane.showMessageDialog(this, "Utente già registrato", "Errore", JOptionPane.ERROR_MESSAGE);
+        try {
+            authService.register(username, password, UserRole.USER, nome, cognome);
+        }catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        Long new_user_id = userDAO.newUser(username, password, UserRole.USER, nome, cognome);
-
-        if (new_user_id != null) {
-            JOptionPane.showMessageDialog(this, "Registrazione completata!", "Successo", JOptionPane.INFORMATION_MESSAGE);
-            dispose();
-            new LoginPanel().setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Errore durante la registrazione.", "Errore", JOptionPane.ERROR_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this, "Registrazione completata!", "Successo", JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+        new LoginPanel().setVisible(true);
     }
 }

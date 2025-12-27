@@ -1,4 +1,4 @@
-package rowmapper;
+package orm.rowmapper;
 
 import model.User;
 import model.UserBuilder;

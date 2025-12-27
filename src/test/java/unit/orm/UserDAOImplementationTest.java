@@ -1,11 +1,11 @@
-package unit.dao;
+package unit.orm;
 
-import db.DBManager;
-import db.QueryResult;
-import db.UserDAOImplementation;
+import orm.DBManager;
+import orm.QueryResult;
+import orm.UserDAOImplementation;
 import model.User;
 import model.enums.UserRole;
-import rowmapper.UserMapper;
+import orm.rowmapper.UserMapper;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

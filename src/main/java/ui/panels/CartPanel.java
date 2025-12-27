@@ -1,13 +1,15 @@
 package ui.panels;
 
-import db.OrdineDAOImplementation;
-import db.ProductDAOImplementation;
+import orm.OrdineDAOImplementation;
+import orm.ProductDAOImplementation;
 import model.DettaglioOrdine;
 import model.Ordine;
 import model.OrdineBuilder;
 import model.Prodotto;
 import model.enums.DeliveryStatus;
 import model.enums.PaymentStatus;
+import services.OrderService;
+import services.ProductService;
 import ui.base.BasePanel;
 import ui.base.UIContext;
 
@@ -21,8 +23,8 @@ import java.util.List;
 public class CartPanel extends BasePanel {
     private JTable productsTable, cartTable;
     private DefaultTableModel cartModel, productsModel;
-    private OrdineDAOImplementation ordineDAO;
-    private ProductDAOImplementation prodottoDAO;
+    private ProductService productService;
+    private OrderService orderService;
 
     private final int targetUserId;
 
@@ -33,8 +35,8 @@ public class CartPanel extends BasePanel {
 
     @Override
     protected void initializeComponents() {
-        prodottoDAO = new ProductDAOImplementation();
-        ordineDAO = new OrdineDAOImplementation();
+        productService = new ProductService();
+        orderService = new OrderService();
 
         productsModel = new DefaultTableModel(new Object[]{"ID", "Nome", "Descrizione", "Prezzo", "Stock"}, 0) {
             @Override
@@ -152,8 +154,7 @@ public class CartPanel extends BasePanel {
             }
 
             Ordine ordine = builder.build();
-            ordineDAO.insertNewOrder(ordine);
-
+            orderService.createOrder(ordine);
             showInfo("Ordine creato con successo!");
 
             // Return to orders panel
@@ -163,14 +164,16 @@ public class CartPanel extends BasePanel {
             }
 
         } catch (Exception ex) {
-            showError("Errore nella creazione dell'ordine: " + ex.getMessage());
+            if(ex.getCause() != null)
+                showError("Errore nella creazione dell'ordine: " + ex.getCause().getMessage());
+            else showError("Errore nella creazione dell'ordine: " + ex.getMessage());
         }
     }
 
     @Override
     protected void loadData() {
         productsModel.setRowCount(0);
-        List<Prodotto> products = prodottoDAO.searchAll();
+        List<Prodotto> products = productService.getAllProducts();
 
         for (Prodotto p : products) {
             if (!p.isDeleted()) {

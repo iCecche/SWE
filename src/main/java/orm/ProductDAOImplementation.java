@@ -1,8 +1,7 @@
-package db;
+package orm;
 
-import model.DettaglioOrdine;
 import model.Prodotto;
-import rowmapper.ProductMapper;
+import orm.rowmapper.ProductMapper;
 import java.sql.SQLException;
 import java.util.List;
 

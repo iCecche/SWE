@@ -1,8 +1,9 @@
 package ui.dialogs;
 
-import db.UserDAOImplementation;
+import orm.UserDAOImplementation;
 import model.User;
 import model.enums.UserRole;
+import services.UserService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,12 +12,12 @@ import java.util.Map;
 
 public class UserFormDialog {
 
-    public static void showAddDialog(Frame parent, UserDAOImplementation userDAO, Runnable onSuccess) {
+    public static void showAddDialog(Frame parent, UserService userService, Runnable onSuccess) {
         Map<String, Object> fields = createAddUserFields();
 
         new Dialog(parent, "Aggiungi Utente", fields, values -> {
             try {
-                createUser(userDAO, values);
+                createUser(userService, values);
                 showSuccess(parent, "Utente aggiunto con successo!");
                 onSuccess.run();
             } catch (Exception e) {
@@ -25,12 +26,12 @@ public class UserFormDialog {
         });
     }
 
-    public static void showEditDialog(Frame parent, User user, UserDAOImplementation userDAO, Runnable onSuccess) {
+    public static void showEditDialog(Frame parent, User user, UserService userService, Runnable onSuccess) {
         Map<String, Object> fields = createEditUserFields(user);
 
         new Dialog(parent, "Modifica Utente", fields, values -> {
             try {
-                updateUser(userDAO, user.getId(), values);
+                updateUser(userService, user.getId(), values);
                 showSuccess(parent, "Utente modificato con successo!");
                 onSuccess.run();
             } catch (Exception e) {
@@ -60,7 +61,7 @@ public class UserFormDialog {
         return fields;
     }
 
-    private static void createUser(UserDAOImplementation userDAO, Map<String, String> values) {
+    private static void createUser(UserService userService, Map<String, String> values) {
         String username = values.get("Username");
         String password = values.get("Password");
         String nome = values.get("Nome");
@@ -68,10 +69,10 @@ public class UserFormDialog {
         UserRole role = UserRole.fromString(values.get("Role"));
 
         validateAddUserInput(username, password, nome, cognome, role);
-        userDAO.newUser(username, password, role, nome, cognome);
+        userService.createUser(username, password, role, nome, cognome);
     }
 
-    private static void updateUser(UserDAOImplementation userDAO, int userId, Map<String, String> values) {
+    private static void updateUser(UserService userService, int userId, Map<String, String> values) {
         String nome = values.get("Nome");
         String cognome = values.get("Cognome");
         String indirizzo = values.get("Indirizzo");
@@ -79,7 +80,7 @@ public class UserFormDialog {
         String provincia = values.get("Provincia");
         String stato = values.get("Stato");
 
-        userDAO.UpdateUserInfo(userId, nome, cognome, indirizzo, cap, provincia, stato);
+        userService.updateUserInfo(userId, nome, cognome, indirizzo, cap, provincia, stato);
     }
 
     private static void validateAddUserInput(String username, String password, String nome, String cognome, UserRole role) {
