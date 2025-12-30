@@ -64,7 +64,7 @@ public class OrdineDAOImplementation implements OrdineDAO {
             Long new_order_id = newOrder(order.getUser_id(), order.getDate(), order.getDeliveryStatus(), order.getPaymentStatus());
             updateStock(order.getDetails());
             for(DettaglioOrdine detail : order.getDetails()) {
-                newOrderDetail(new_order_id, detail.getProduct_id(), detail.getQuantity()); //fixme: posso rimuovere orderId da DettaglioOrdine dato che adesso sono inclusi in Obj di tipo Ordine
+                newOrderDetail(new_order_id, detail.getProduct_id(), detail.getQuantity());
             }
             return new_order_id;
         });

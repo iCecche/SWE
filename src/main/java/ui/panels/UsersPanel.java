@@ -212,9 +212,10 @@ public class UsersPanel extends BasePanel {
             return;
         }
 
-        // FIXME: add dao method to return only admin users, search through all admin users and if this user in the
-        //  only one, stop deletion. Needs to be at least one admin user left. Display error message.
-        // use a if statement to check if there is only one admin left
+        if (user.getRole() == UserRole.ADMIN && isSelfDeletion(user)) {
+            showError("Non puoi eliminare il tuo profilo.");
+            return;
+        }
 
         String message = String.format("Sei sicuro di voler eliminare l'utente '%s'?",
                 user.getUsername());
