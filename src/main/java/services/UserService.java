@@ -2,6 +2,7 @@ package services;
 
 import model.User;
 import model.enums.UserRole;
+import model.exceptions.UserServiceException;
 import orm.UserDAO;
 import orm.UserDAOImplementation;
 
@@ -10,6 +11,10 @@ import java.util.List;
 public class UserService {
 
     private final UserDAO userDAO;
+
+    public UserService(UserDAO userDAO) {
+        this.userDAO = userDAO;
+    }
 
     public UserService() {
         this.userDAO = new UserDAOImplementation();
@@ -28,7 +33,12 @@ public class UserService {
     }
 
     public User searchUserInfoById(int id) {
-        return userDAO.searchUserInfoById(id);
+
+        User user = userDAO.searchUserInfoById(id);
+        if (user == null) {
+            throw new UserServiceException("L'utente con id " + id + " non esiste");
+        }
+        return user;
     }
 
     public void createUser(String username, String password, UserRole role, String nome, String cognome) {
@@ -36,14 +46,40 @@ public class UserService {
     }
 
     public void updateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
+        User user = getUserById(id);
+
+        if (user.isDeleted()) {
+            throw new UserServiceException("L'utente è eliminato");
+        }
+
         userDAO.UpdateUserInfo(id, nome, cognome, indirizzo, cap, provincia, stato);
     }
 
-    public void updateRole(int id, UserRole newRole) {
+    public void updateRole(int id) {
+        User user = getUserById(id);
+
+        if (user.isDeleted()) {
+            throw new UserServiceException("L'utente è eliminato");
+        }
+
+        UserRole newRole = user.getRole() == UserRole.ADMIN ? UserRole.USER : UserRole.ADMIN;
         userDAO.UpdateRole(id, newRole);
     }
 
     public void deleteUser(int id) {
+
+        User user = getUserById(id);
+        SessionManager sessionManager = SessionManager.getInstance();
+
+        if (user.isDeleted()) {
+            throw new UserServiceException("L'utente è eliminato");
+        }
+
+        if (sessionManager.getInstance().isAdmin() && sessionManager.getCurrentUser().getId() == id) {
+            throw new UserServiceException("Non puoi eliminare il tuo profilo");
+        }
+
+        // se passa tutti i controlli, procedi
         userDAO.deleteUser(id);
     }
 }

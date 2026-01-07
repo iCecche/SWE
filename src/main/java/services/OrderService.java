@@ -3,6 +3,7 @@ package services;
 import model.Ordine;
 import model.enums.DeliveryStatus;
 import model.enums.PaymentStatus;
+import model.exceptions.OrderBusinessException;
 import orm.OrdineDAOImplementation;
 
 import java.util.List;
@@ -26,15 +27,35 @@ public class OrderService {
         ordineDAO.insertNewOrder(ordine);
     }
 
-    public void updatePaymentStatus(int order_id, PaymentStatus new_status) {
-        ordineDAO.updatePaymentStatus(order_id, new_status);
-    }
-
-    public void updateDeliveryStatus(int order_id, DeliveryStatus new_status) {
-        ordineDAO.updateDeliveryStatus(order_id, new_status);
-    }
-
     public void deleteOrder(int order_id) {
         ordineDAO.deleteOrder(order_id);
+    }
+
+    public void shipOrder(int order_id) {
+       Ordine ordine = ordineDAO.searchById(order_id);
+
+       // Non puoi spedire se ordine deve essere pagato
+       if(ordine.getPaymentStatus() != PaymentStatus.PAID) {
+           throw new OrderBusinessException("Impossibile inoltrare l'ordine #" + order_id + ": il pagamento risulta ancora " + ordine.getPaymentStatus());
+       }
+
+        // Non puoi rispedire se è già consegnato o annullato
+        if (ordine.getDeliveryStatus() != DeliveryStatus.PENDING) {
+            throw new OrderBusinessException("L'ordine non è in uno stato che permette l'inoltro.");
+        }
+
+        // Se tutti i controlli passano, procedo
+        ordineDAO.updateDeliveryStatus(order_id, DeliveryStatus.SHIPPED);
+    }
+
+    public void payOrder(int order_id) {
+        Ordine ordine = ordineDAO.searchById(order_id);
+
+        // Non puoi ripagare se ordine risulta già pagato
+        if(ordine.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new OrderBusinessException("Impossibile inoltrare l'ordine #\" + order_id + \": il pagamento risulta già effettuato");
+        }
+        // se tutti i controlli passano, procedo
+        ordineDAO.updatePaymentStatus(order_id, PaymentStatus.PAID);
     }
 }

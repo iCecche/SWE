@@ -1,7 +1,5 @@
 package ui.panels;
 
-import orm.OrdineDAOImplementation;
-import orm.ProductDAOImplementation;
 import model.DettaglioOrdine;
 import model.Ordine;
 import model.OrdineBuilder;
@@ -11,7 +9,6 @@ import model.enums.PaymentStatus;
 import services.OrderService;
 import services.ProductService;
 import ui.base.BasePanel;
-import ui.base.UIContext;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -28,8 +25,8 @@ public class CartPanel extends BasePanel {
 
     private final int targetUserId;
 
-    public CartPanel(UIContext uiContext, int targetUserId) {
-        super(uiContext);
+    public CartPanel( int targetUserId) {
+        super();
         this.targetUserId = targetUserId;
     }
 
@@ -160,7 +157,7 @@ public class CartPanel extends BasePanel {
             // Return to orders panel
             Container parent = getParent();
             if (parent != null) {
-                setContent(new OrdiniPanel(uiContext), parent);
+                setContent(new OrdiniPanel(), parent);
             }
 
         } catch (Exception ex) {

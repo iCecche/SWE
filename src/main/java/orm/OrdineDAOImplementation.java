@@ -54,6 +54,20 @@ public class OrdineDAOImplementation implements OrdineDAO {
         return search(sql, params).getResults();
     }
 
+    @Override
+    public Ordine searchById(int order_id) {
+        builder = QueryBuilder.create();
+        builder.select("o.id AS order_id", "user_id", "date", "product_id", "quantity", "payment_status", "delivery_status")
+                .from("ORDERS o")
+                .leftJoin("ORDERS_DETAILS d", "d.order_id = o.id")
+                .where("o.id = ?")
+                .addParameter(order_id);
+
+        String sql = builder.getQuery();
+        Object[] params = builder.getParameters();
+        return search(sql, params).getSingleResult().orElseThrow();
+    }
+
     private QueryResult<Ordine> search(String sql, Object... params) {
         return db.execute_query(sql, mapper, params);
     }

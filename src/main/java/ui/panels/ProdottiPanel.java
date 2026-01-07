@@ -1,11 +1,11 @@
 package ui.panels;
 
-import orm.ProductDAOImplementation;
 import model.Prodotto;
+import model.exceptions.ProductServiceException;
 import services.ProductService;
+import services.SessionManager;
 import ui.dialogs.Dialog;
 import ui.base.BasePanel;
-import ui.base.UIContext;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -19,20 +19,22 @@ public class ProdottiPanel extends BasePanel {
     private JTable tabella;
     private DefaultTableModel modello;
     private ProductService productService;
+    private SessionManager manager;
 
-    public ProdottiPanel(UIContext uiContext) {
-        super(uiContext);
+    public ProdottiPanel() {
+        super();
     }
 
     @Override
     protected void initializeComponents() {
         this.productService = new ProductService();
+        this.manager = SessionManager.getInstance();
 
-        String[] columns = uiContext.getPermissionStrategy().getProductTableColumns();
+        String[] columns = manager.getPermissions().getProductTableColumns();
         modello = createNonEditableTableModel(columns);
         tabella = new JTable(modello);
 
-        if (uiContext.getPermissionStrategy().canManageProducts()) {
+        if (manager.getPermissions().canManageProducts()) {
             createButtons();
         }
     }
@@ -114,20 +116,15 @@ public class ProdottiPanel extends BasePanel {
         int id = getSelectedRowId(tabella);
         if (id == -1) return;
 
-        int selectedRow = tabella.getSelectedRow();
-        if (uiContext.isAdmin()) {
-            // Check if already deleted for admin view
-            boolean isDeleted = (Boolean) tabella.getValueAt(selectedRow, 5);
-            if (isDeleted) {
-                showError("Prodotto già eliminato.");
-                return;
+        try {
+            if(confirmAction("Sei sicuro di voler eliminare questo prodotto?")) {
+                productService.deleteProduct(id);
+                showInfo("Prodotto eliminato con successo!");
             }
-        }
-
-        if (confirmAction("Sei sicuro di voler eliminare questo prodotto?")) {
-            productService.deleteProduct(id);
+        }catch (ProductServiceException ex) {
+            showError(ex.getMessage());
+        }finally {
             loadData();
-            showInfo("Prodotto eliminato con successo!");
         }
     }
 
@@ -159,7 +156,7 @@ public class ProdottiPanel extends BasePanel {
 
     private void addProductToTable(Prodotto prodotto) {
         Object[] rowData;
-        if (uiContext.isAdmin()) {
+        if (manager.isAdmin()) {
             rowData = new Object[]{
                     prodotto.getId(), prodotto.getName(), prodotto.getDescription(),
                     prodotto.getPrice(), prodotto.getStock(), prodotto.isDeleted()

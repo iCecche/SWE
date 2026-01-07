@@ -11,6 +11,7 @@ public interface  OrdineDAO {
     // Search
     List<Ordine> searchAll();
     List<Ordine> searchByUserID(int user_id);
+    Ordine searchById(int order_id);
 
     // Insert
     Long insertNewOrder(Ordine order);

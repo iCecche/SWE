@@ -1,5 +1,6 @@
 package ui.panels;
 
+import model.exceptions.AuthServiceException;
 import orm.UserDAOImplementation;
 import model.User;
 import model.enums.UserRole;
@@ -135,23 +136,12 @@ public class RegisterPanel extends JFrame {
         String nome = nome_field.getText().trim();
         String cognome = cognome_field.getText().trim();
 
-        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Compila tutti i campi.", "Errore", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (!password.equals(confirmPassword)) {
-            JOptionPane.showMessageDialog(this, "Le password non coincidono.", "Errore", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         authService = new AuthService();
 
         try {
-            authService.register(username, password, UserRole.USER, nome, cognome);
-        }catch (Exception ex) {
+            authService.register(username, password, confirmPassword, UserRole.USER, nome, cognome);
+        }catch (AuthServiceException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
-            return;
         }
 
         JOptionPane.showMessageDialog(this, "Registrazione completata!", "Successo", JOptionPane.INFORMATION_MESSAGE);

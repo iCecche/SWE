@@ -1,14 +1,11 @@
 package ui.panels;
 
 import model.Prodotto;
-import orm.OrdineDAOImplementation;
-import orm.ProductDAOImplementation;
+import model.exceptions.OrderBusinessException;
 import model.Ordine;
-import model.enums.DeliveryStatus;
-import model.enums.PaymentStatus;
 import services.OrderService;
 import services.ProductService;
-import ui.base.UIContext;
+import services.SessionManager;
 import ui.base.BasePanel;
 
 import javax.swing.*;
@@ -30,20 +27,22 @@ public class OrdiniPanel extends BasePanel {
     private DefaultTableModel detailModel;
     private OrderService orderService;
     private ProductService productService;
+    private SessionManager manager;
 
-    public OrdiniPanel(UIContext uiContext) {
-        super(uiContext);
+    public OrdiniPanel() {
+        super();
     }
 
     @Override
     protected void initializeComponents() {
         this.orderService = new OrderService();
         this.productService = new ProductService();
+        this.manager = SessionManager.getInstance();
         this.ordineMap = new HashMap<>();
 
         // Create table models with appropriate columns based on permissions
-        String[] orderColumns = uiContext.getPermissionStrategy().getOrderTableColumns();
-        String[] productColumns = uiContext.getPermissionStrategy().getProductTableColumns();
+        String[] orderColumns = manager.getPermissions().getOrderTableColumns();
+        String[] productColumns = manager.getPermissions().getProductTableColumns();
 
         orderModel = createNonEditableTableModel(orderColumns);
         detailModel = createNonEditableTableModel(productColumns);
@@ -121,13 +120,13 @@ public class OrdiniPanel extends BasePanel {
     private void createButtons() {
         buttonPanel = new JPanel();
 
-        if (uiContext.getPermissionStrategy().canCreateOrders()) {
+        if (manager.getPermissions().canCreateOrders()) {
             JButton addButton = new JButton("Aggiungi Ordine");
             addButton.addActionListener(this::handleAddOrder);
             buttonPanel.add(addButton);
         }
 
-        if (uiContext.getPermissionStrategy().canDeleteOrders()) {
+        if (manager.getPermissions().canDeleteOrders()) {
             JButton deleteButton = new JButton("Elimina");
             deleteButton.addActionListener(this::handleDeleteOrder);
             buttonPanel.add(deleteButton);
@@ -137,7 +136,7 @@ public class OrdiniPanel extends BasePanel {
             buttonPanel.add(shipButton);
         }
 
-        if (!uiContext.getPermissionStrategy().canDeleteOrders()) {
+        if (!manager.getPermissions().canDeleteOrders()) {
             JButton payButton = new JButton("Paga");
             payButton.addActionListener(this::handlePayOrder);
             buttonPanel.add(payButton);
@@ -145,7 +144,7 @@ public class OrdiniPanel extends BasePanel {
     }
 
     private void handleAddOrder(ActionEvent e) {
-        if (uiContext.isAdmin()) {
+        if (manager.isAdmin()) {
             // Show user selection for admin
             showUserSelectionDialog();
         } else {
@@ -156,7 +155,8 @@ public class OrdiniPanel extends BasePanel {
 
     private void handleDeleteOrder(ActionEvent e) {
         int orderId = getSelectedRowId(orderTable);
-        if (orderId != -1 && confirmAction("Sei sicuro di voler eliminare questo ordine?")) {
+        if (orderId == -1) return;
+        if (confirmAction("Sei sicuro di voler eliminare questo ordine?")) {
             orderService.deleteOrder(orderId);
             loadData();
             showInfo("Ordine eliminato con successo.");
@@ -164,77 +164,56 @@ public class OrdiniPanel extends BasePanel {
     }
 
     private void handlePayOrder(ActionEvent e) {
-        int selectedRow = orderTable.getSelectedRow();
-        if (selectedRow == -1) return;
-
-        int paymentStatusCol = getPaymentStatusColumnIndex();
-        String paymentStatus = (String) orderTable.getValueAt(selectedRow, paymentStatusCol);
-
-        if (PaymentStatus.fromString(paymentStatus) == PaymentStatus.PAID) {
-            showError("L'ordine è già stato pagato.");
-            return;
-        }
-
         int orderId = getSelectedRowId(orderTable);
-        if (orderId != -1) {
-            orderService.updatePaymentStatus(orderId, PaymentStatus.PAID);
+        if (orderId == -1) return;
+        try {
+            orderService.payOrder(orderId);
+            showInfo("Ordine pagato con successo.");
+        }catch (OrderBusinessException ex) {
+            showError(ex.getMessage());
+        }finally {
             loadData();
-            showInfo("Pagamento effettuato con successo.");
         }
     }
 
     private void handleShipOrder(ActionEvent e) {
-        int selectedRow = orderTable.getSelectedRow();
-        if (selectedRow == -1) return;
-
-        int deliveryStatusCol = getDeliveryStatusColumnIndex();
-        String deliveryStatus = (String) orderTable.getValueAt(selectedRow, deliveryStatusCol);
-        DeliveryStatus status = DeliveryStatus.fromString(deliveryStatus);
-
-        if (status == DeliveryStatus.SHIPPED || status == DeliveryStatus.DELIVERED) {
-            showError("L'ordine è già stato gestito.");
-            return;
-        }
-
-        int paymentStatusCol = getPaymentStatusColumnIndex();
-        String paymentStatus = (String) orderTable.getValueAt(selectedRow, paymentStatusCol);
-        PaymentStatus payment = PaymentStatus.fromString(paymentStatus);
-
-        if (payment != PaymentStatus.PAID) {
-            showError("L'ordine deve prima essere pagato.");
-        }
-
         int orderId = getSelectedRowId(orderTable);
-        if (orderId != -1 && confirmAction("Confermi la spedizione dell'ordine?")) {
-            orderService.updateDeliveryStatus(orderId, DeliveryStatus.SHIPPED);
-            loadData();
+
+        try {
+            if (confirmAction("Confermi la spedizione dell'ordine?")) {
+                orderService.shipOrder(orderId);
+            }
             showInfo("Ordine spedito con successo.");
+        }catch (OrderBusinessException ex) {
+            showError(ex.getMessage());
+        }finally {
+            loadData();
         }
     }
 
     private void showUserSelectionDialog() {
         Container parent = getParent();
-        setContent(UsersPanel.createUserSelectionView(uiContext, userID -> showCartPanel(userID, parent)), parent);
+        setContent(UsersPanel.createUserSelectionView(userID -> showCartPanel(userID, parent)), parent);
     }
 
     private void showCartPanel() {
         Container parent = getParent();
-        showCartPanel(uiContext.getUserId(), parent);
+        showCartPanel(manager.getCurrentUser().getId(), parent);
     }
 
     private void showCartPanel(int targetUserId, Container parent) {
         if (parent != null) {
-            setContent(new CartPanel(uiContext, targetUserId), parent);
+            setContent(new CartPanel(targetUserId), parent);
         }
     }
 
     private void showUserDetails(int userId) {
         Container parent = getParent();
-        setContent(UsersPanel.createAdminProfileView(uiContext, userId), parent);
+        setContent(UsersPanel.createAdminProfileView(userId), parent);
     }
 
     private int getPaymentStatusColumnIndex() {
-        String[] columns = uiContext.getPermissionStrategy().getOrderTableColumns();
+        String[] columns = manager.getPermissions().getOrderTableColumns();
         for (int i = 0; i < columns.length; i++) {
             if ("Payment Status".equals(columns[i])) {
                 return i;
@@ -244,7 +223,7 @@ public class OrdiniPanel extends BasePanel {
     }
 
     private int getDeliveryStatusColumnIndex() {
-        String[] columns = uiContext.getPermissionStrategy().getOrderTableColumns();
+        String[] columns = manager.getPermissions().getOrderTableColumns();
         for (int i = 0; i < columns.length; i++) {
             if ("Delivery Status".equals(columns[i])) {
                 return i;
@@ -259,16 +238,16 @@ public class OrdiniPanel extends BasePanel {
         detailModel.setRowCount(0);
         ordineMap.clear();
 
-        List<Ordine> ordini = uiContext.getPermissionStrategy().canViewAllOrders()
+        List<Ordine> ordini = manager.getPermissions().canViewAllOrders()
                 ? orderService.getOrders()
-                : orderService.getOrdersByUserID(uiContext.getUserId());
+                : orderService.getOrdersByUserID(manager.getCurrentUser().getId());
 
         ordini.forEach(this::addOrderToTable);
     }
 
     private void addOrderToTable(Ordine ordine) {
         Object[] rowData;
-        if (uiContext.isAdmin()) {
+        if (manager.isAdmin()) {
             rowData = new Object[]{
                     ordine.getOrder_id(), ordine.getUser_id(), ordine.getDate(),
                     ordine.getDelivery_status(), ordine.getPayment_status()

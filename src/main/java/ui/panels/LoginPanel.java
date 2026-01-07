@@ -1,8 +1,10 @@
 package ui.panels;
 
+import model.exceptions.AuthServiceException;
 import orm.UserDAOImplementation;
 import model.User;
 import services.AuthService;
+import services.SessionManager;
 import ui.UIFactory;
 
 import javax.swing.*;
@@ -94,29 +96,21 @@ public class LoginPanel extends JFrame {
     }
 
     private void performLogin() {
-        authService = new AuthService();
         String username = username_field.getText().trim();
         String password = new String(password_field.getPassword());
 
-        if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Inserisci username e password.",
-                    "Errore", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         // User authentication
-        User user;
+        authService = new AuthService();
         try {
-            user = authService.login(username, password);
-        }catch (Exception ex) {
+            User user = authService.login(username, password);
+            SessionManager.getInstance().login(user);
+            // If authentication succeeds, open appropriate dashboard
+            JOptionPane.showMessageDialog(this, "Login effettuato!", "Successo", JOptionPane.INFORMATION_MESSAGE);
+            openDashboard(user);
+        }catch (AuthServiceException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        // If authentication succeeds, open appropriate dashboard
-        JOptionPane.showMessageDialog(this, "Login effettuato!",
-                "Successo", JOptionPane.INFORMATION_MESSAGE);
-        openDashboard(user);
     }
 
     private void openDashboard(User user) {

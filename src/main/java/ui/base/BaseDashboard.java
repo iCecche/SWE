@@ -2,6 +2,7 @@ package ui.base;
 
 import model.User;
 import model.enums.UserRole;
+import services.SessionManager;
 import ui.panels.*;
 
 import javax.swing.*;
@@ -13,10 +14,10 @@ import java.awt.event.MouseEvent;
 public abstract class BaseDashboard extends JFrame {
     protected JPanel sidebarPanel;
     protected JPanel contentPanel;
-    protected UIContext uiContext;
+    protected SessionManager manager;
 
     public BaseDashboard(User user) {
-        this.uiContext = new UIContext(user);
+        this.manager = SessionManager.getInstance();
         initializeFrame();
         setupLayout();
         createSidebar();
@@ -34,10 +35,10 @@ public abstract class BaseDashboard extends JFrame {
     }
 
     private String getRoleTitle() {
-        if (uiContext.getCurrentUser().getRole() == UserRole.ADMIN) {
+        if (manager.getCurrentUser().getRole() == UserRole.ADMIN) {
             return "Admin";
         }
-        return uiContext.getCurrentUser().getUsername();
+        return manager.getCurrentUser().getUsername();
     }
 
     private void setupLayout() {
@@ -97,23 +98,23 @@ public abstract class BaseDashboard extends JFrame {
     }
 
     protected void showHome() {
-        setContent(new JLabel("Benvenuto " + uiContext.getCurrentUser().getUsername() + "!", SwingConstants.CENTER));
+        setContent(new JLabel("Benvenuto " + manager.getCurrentUser().getUsername() + "!", SwingConstants.CENTER));
     }
 
     protected void showProducts() {
-        setContent(new ProdottiPanel(uiContext));
+        setContent(new ProdottiPanel());
     }
 
     protected void showOrders() {
-        setContent(new OrdiniPanel(uiContext));
+        setContent(new OrdiniPanel());
     }
 
     protected void showUsers() {
-        setContent(UsersPanel.createAdminUsersView(uiContext));
+        setContent(UsersPanel.createAdminUsersView());
     }
 
     protected void showProfile() {
-        setContent(UsersPanel.createUserProfileView(uiContext));
+        setContent(UsersPanel.createUserProfileView());
     }
 
     protected void setContent(Component comp) {

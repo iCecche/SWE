@@ -1,6 +1,7 @@
 package services;
 
 import model.Prodotto;
+import model.exceptions.ProductServiceException;
 import orm.ProductDAOImplementation;
 
 import java.util.List;
@@ -8,6 +9,11 @@ import java.util.List;
 public class ProductService {
 
     private final ProductDAOImplementation productDAO;
+
+    // Constructor needed for testing
+    public ProductService(ProductDAOImplementation productDAO) {
+        this.productDAO = productDAO;
+    }
 
     public ProductService() {
         productDAO = new ProductDAOImplementation();
@@ -30,6 +36,14 @@ public class ProductService {
     }
 
     public void deleteProduct(int id) {
+        Prodotto product = productDAO.searchById(id);
+
+        // Controllo se il prodotto è già stato eliminato
+        if (product.isDeleted()) {
+            throw new ProductServiceException("Il prodotto è già eliminato");
+        }
+
+        // Se tutti i controlli passano, procedo
         productDAO.deleteProduct(id);
     }
 }

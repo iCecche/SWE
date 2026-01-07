@@ -1,11 +1,10 @@
 package ui.panels;
 
-import orm.UserDAOImplementation;
+import model.exceptions.UserServiceException;
 import model.User;
-import model.enums.UserRole;
+import services.SessionManager;
 import services.UserService;
 import ui.base.BasePanel;
-import ui.base.UIContext;
 import ui.dialogs.UserFormDialog;
 
 import javax.swing.*;
@@ -32,35 +31,36 @@ public class UsersPanel extends BasePanel {
     private JTable userTable;
     private DefaultTableModel tableModel;
     private UserService userService;
+    private static SessionManager manager = SessionManager.getInstance();
 
     // Factory methods for different use cases
-    public static UsersPanel createAdminUsersView(UIContext uiContext) {
-        return new UsersPanel(uiContext, new PanelConfiguration(
+    public static UsersPanel createAdminUsersView() {
+        return new UsersPanel(new PanelConfiguration(
             ViewMode.ADMIN_ALL_USERS, 0, null
         ));
     }
 
-    public static UsersPanel createUserProfileView(UIContext uiContext) {
-        return new UsersPanel(uiContext, new PanelConfiguration(
-            ViewMode.USER_PROFILE, uiContext.getUserId(), null
+    public static UsersPanel createUserProfileView() {
+        return new UsersPanel(new PanelConfiguration(
+            ViewMode.USER_PROFILE, manager.getCurrentUser().getId(), null
         ));
     }
 
-    public static UsersPanel createAdminProfileView(UIContext uiContext, int targetUserId) {
-        return new UsersPanel(uiContext, new PanelConfiguration(
+    public static UsersPanel createAdminProfileView(int targetUserId) {
+        return new UsersPanel(new PanelConfiguration(
             ViewMode.ADMIN_PROFILE, targetUserId, null
         ));
     }
 
-    public static UsersPanel createUserSelectionView(UIContext uiContext, Consumer<Integer> onUserSelected) {
-        return new UsersPanel(uiContext, new PanelConfiguration(
+    public static UsersPanel createUserSelectionView(Consumer<Integer> onUserSelected) {
+        return new UsersPanel(new PanelConfiguration(
             ViewMode.USER_SELECTION, 0, onUserSelected
         ));
     }
 
     // Main constructor - now completely safe
-    private UsersPanel(UIContext uiContext, PanelConfiguration config) {
-        super(uiContext, true);
+    private UsersPanel(PanelConfiguration config) {
+        super(true);
         this.config = config;
         initializeComponents();
         setupLayout();
@@ -84,7 +84,7 @@ public class UsersPanel extends BasePanel {
         return switch (config.viewMode) {
             case USER_SELECTION -> new String[]{"ID", "Username", "Nome", "Cognome"};
             case USER_PROFILE -> new String[]{"ID", "Username", "Nome", "Cognome", "Indirizzo", "Cap", "Provincia", "Stato"};
-            default -> uiContext.getPermissionStrategy().getUserTableColumns();
+            default -> manager.getPermissions().getUserTableColumns();
         };
     }
 
@@ -178,7 +178,7 @@ public class UsersPanel extends BasePanel {
 
     private boolean canDeleteProfile() {
         return config.viewMode == ViewMode.USER_PROFILE ||
-                (config.viewMode == ViewMode.ADMIN_PROFILE && config.targetUserId != uiContext.getUserId());
+                (config.viewMode == ViewMode.ADMIN_PROFILE && config.targetUserId != manager.getCurrentUser().getId());
     }
 
     private void addButton(String text, Runnable action) {
@@ -193,77 +193,48 @@ public class UsersPanel extends BasePanel {
     }
 
     private void handleModify() {
-        User user = getSelectedUser();
-        if (user == null) return;
-        if (user.isDeleted()) {
-            showError("L'utente è eliminato.");
-            return;
+        try {
+            User user = getSelectedUser();
+            UserFormDialog.showEditDialog(null, user, userService, this::loadData);
+        }catch (UserServiceException ex) {
+            showError(ex.getMessage());
         }
-
-        UserFormDialog.showEditDialog(null, user, userService, this::loadData);
     }
 
     private void handleDelete() {
-        User user = getSelectedUser();
-        if (user == null) return;
-
-        if (user.isDeleted()) {
-            showError("Utente già eliminato.");
-            return;
-        }
-
-        if (user.getRole() == UserRole.ADMIN && isSelfDeletion(user)) {
-            showError("Non puoi eliminare il tuo profilo.");
-            return;
-        }
-
-        String message = String.format("Sei sicuro di voler eliminare l'utente '%s'?",
-                user.getUsername());
-
-        if (!confirmAction(message)) return;
+        int user_id = getSelectedUserId();
+        if (!confirmAction("Sei sicuro di voler eliminare l'utente")) return;
 
         try {
-            userService.deleteUser(user.getId());
-
-            if (isSelfDeletion(user)) {
+            userService.deleteUser(user_id);
+            showInfo("Utente eliminato con successo!");
+            if(isSelfDeletion(user_id))
                 handleSelfDeletion();
-            } else {
-                loadData();
-                showInfo("Utente eliminato con successo!");
-            }
-        } catch (Exception e) {
-            showError("Errore nell'eliminazione: " + e.getMessage());
+        } catch (UserServiceException ex) {
+            showError("Errore nell'eliminazione: " + ex.getMessage());
+        }finally {
+            loadData();
         }
     }
 
-    private boolean isSelfDeletion(User user) {
-        return config.viewMode == ViewMode.USER_PROFILE && user.getId() == uiContext.getUserId();
+    private boolean isSelfDeletion(int user_id) {
+        return SessionManager.getInstance().getCurrentUser().getId() == user_id;
     }
 
     private void handleSelfDeletion() {
         SwingUtilities.invokeLater(() -> {
+            SessionManager.getInstance().logout();
             SwingUtilities.getWindowAncestor(this).dispose();
             new ui.panels.LoginPanel().setVisible(true);
         });
     }
 
     private void handleRoleToggle() {
-        User user = getSelectedUser();
-        if (user == null) return;
-
-        if (user.isDeleted()) {
-            showError("L'utente è eliminato");
-            return;
-        }
-
-        UserRole newRole = user.getRole() == UserRole.ADMIN ? UserRole.USER : UserRole.ADMIN;
-        String message = String.format("Cambiare il ruolo di '%s' da %s a %s?",
-                user.getUsername(), user.getRole(), newRole);
-
-        if (!confirmAction(message)) return;
+        int user_id = getSelectedUserId();
+        if (!confirmAction("Cambiare il ruolo?")) return;
 
         try {
-            userService.updateRole(user.getId(), newRole);
+            userService.updateRole(user_id);
             loadData();
             showInfo("Ruolo cambiato con successo!");
         } catch (Exception e) {
@@ -273,19 +244,13 @@ public class UsersPanel extends BasePanel {
 
     // Utility Methods
     private User getSelectedUser() {
-        int selectedRow = userTable.getSelectedRow();
-        if (selectedRow == -1) {
-            showError("Seleziona un utente dalla tabella.");
-            return null;
-        }
-
         int userId = getSelectedUserId();
-        User user = userService.searchUserInfoById(userId);
-
-        if (user == null) {
-            showError("Utente non trovato.");
+        User user = null;
+        try {
+            user = userService.searchUserInfoById(userId);
+        } catch (UserServiceException ex) {
+            showError(ex.getMessage());
         }
-
         return user;
     }
 

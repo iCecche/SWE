@@ -7,19 +7,16 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public abstract class BasePanel extends JPanel {
-    protected final UIContext uiContext;
     protected JPanel buttonPanel;
 
-    protected BasePanel(UIContext uiContext) {
-        this.uiContext = uiContext;
+    protected BasePanel() {
         setupPanel();
         initializeComponents();
         setupLayout();
         loadData();
     }
 
-    protected BasePanel(UIContext uiContext, boolean isCustomConfig) {
-        this.uiContext = uiContext;
+    protected BasePanel(boolean isCustomConfig) {
         setupPanel();
     }
 

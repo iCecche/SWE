@@ -2,11 +2,8 @@ package services;
 
 import model.User;
 import model.enums.UserRole;
-import model.exceptions.UserAlreadyExists;
-import model.exceptions.UserNotFound;
+import model.exceptions.AuthServiceException;
 import orm.UserDAOImplementation;
-
-import javax.swing.*;
 
 public class AuthService {
     private final UserDAOImplementation userDAO;
@@ -20,30 +17,44 @@ public class AuthService {
     }
 
     public User login(String username, String password) {
+
+        if (username.isEmpty() || password.isEmpty()) {
+            throw new AuthServiceException("Compila tutti i campi");
+        }
+
         User user = userDAO.searchByUsername(username);
         // User authentication
         if (user == null || user.isDeleted()) {
-            throw new UserNotFound("Utente non registrato.");
+            throw new AuthServiceException("Utente non registrato.");
         }
 
         if (!user.getPassword().equals(password)) {
-            throw new UserNotFound("Password errata.");
+            throw new AuthServiceException("Password errata.");
         }
 
         return user;
     };
 
-    public void register(String username, String password, UserRole role, String nome, String cognome) {
+    public void register(String username, String password, String confirmPassword, UserRole role, String nome, String cognome) {
+
+        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            throw new AuthServiceException("Compila tutti i campi");
+        }
+
+        if (!password.equals(confirmPassword)) {
+            throw new AuthServiceException("Le password non coincidono");
+        }
+
         User user = userDAO.searchByUsername(username);
 
         if (user != null) {
-            throw new UserAlreadyExists("Utente già registrato");
+            throw new AuthServiceException("Utente già registrato");
         }
 
         Long newUser_Id = userDAO.newUser(username, password, role, nome, cognome);
 
         if(newUser_Id == null) {
-            throw new RuntimeException("Errore durante la registrazione");
+            throw new AuthServiceException("Errore durante la registrazione");
         }
         return;
     };
