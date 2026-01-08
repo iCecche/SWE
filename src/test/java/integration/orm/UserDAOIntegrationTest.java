@@ -1,4 +1,4 @@
-package integration;
+package integration.orm;
 
 import orm.DBManager;
 import orm.UserDAOImplementation;

@@ -28,11 +28,11 @@ public class UserService {
         return userDAO.searchByUsername(username);
     }
 
-    public List<User> searchUsersInfo() {
+    public List<User> getUsersInfo() {
         return userDAO.searchUsersInfo();
     }
 
-    public User searchUserInfoById(int id) {
+    public User getUserInfoById(int id) {
 
         User user = userDAO.searchUserInfoById(id);
         if (user == null) {
@@ -46,7 +46,7 @@ public class UserService {
     }
 
     public void updateUserInfo(int id, String nome, String cognome, String indirizzo, String cap, String provincia, String stato) {
-        User user = getUserById(id);
+        User user = userDAO.searchById(id);
 
         if (user.isDeleted()) {
             throw new UserServiceException("L'utente è eliminato");
@@ -56,7 +56,7 @@ public class UserService {
     }
 
     public void updateRole(int id) {
-        User user = getUserById(id);
+        User user = userDAO.searchById(id);
 
         if (user.isDeleted()) {
             throw new UserServiceException("L'utente è eliminato");
@@ -68,7 +68,7 @@ public class UserService {
 
     public void deleteUser(int id) {
 
-        User user = getUserById(id);
+        User user = userDAO.searchById(id);
         SessionManager sessionManager = SessionManager.getInstance();
 
         if (user.isDeleted()) {

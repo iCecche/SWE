@@ -11,6 +11,10 @@ import java.util.List;
 public class OrderService {
     private final OrdineDAOImplementation ordineDAO;
 
+    public OrderService(OrdineDAOImplementation ordineDAO) {
+        this.ordineDAO = ordineDAO;
+    }
+
     public OrderService() {
         ordineDAO = new OrdineDAOImplementation();
     }

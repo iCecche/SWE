@@ -247,7 +247,7 @@ public class UsersPanel extends BasePanel {
         int userId = getSelectedUserId();
         User user = null;
         try {
-            user = userService.searchUserInfoById(userId);
+            user = userService.getUserInfoById(userId);
         } catch (UserServiceException ex) {
             showError(ex.getMessage());
         }
@@ -279,12 +279,12 @@ public class UsersPanel extends BasePanel {
 
     private List<User> getUsersToDisplay() {
         return switch (config.viewMode) {
-            case ADMIN_ALL_USERS -> userService.searchUsersInfo();
+            case ADMIN_ALL_USERS -> userService.getUsersInfo();
             case USER_PROFILE, ADMIN_PROFILE -> {
-                User user = userService.searchUserInfoById(config.targetUserId);
+                User user = userService.getUserInfoById(config.targetUserId);
                 yield user != null ? List.of(user) : List.of();
             }
-            case USER_SELECTION -> userService.searchUsersInfo().stream()
+            case USER_SELECTION -> userService.getUsersInfo().stream()
                     .filter(user -> !user.isDeleted())
                     .toList();
         };

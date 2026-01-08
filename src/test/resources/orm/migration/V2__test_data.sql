@@ -1,16 +1,16 @@
 -- V2__test_data.sql
 
-INSERT INTO USERS (USERNAME, PASSWORD, ROLE)
-VALUES ('user1', 'user1', 'USER'),
-       ('user2', 'user2', 'USER'),
-       ('user3', 'user3', 'USER'),
-       ('user4', 'user4', 'USER'),
-       ('user5', 'user5', 'USER'),
-       ('user6', 'user6', 'USER'),
-       ('user7', 'user7', 'USER'),
-       ('user8', 'user8', 'USER'),
-       ('user9', 'user9', 'USER'),
-       ('admin', 'admin', 'ADMIN');
+INSERT INTO USERS (USERNAME, PASSWORD, ROLE, IS_DELETED)
+VALUES ('user1', 'user1', 'USER', FALSE),
+       ('user2', 'user2', 'USER', FALSE),
+       ('user3', 'user3', 'USER', FALSE),
+       ('user4', 'user4', 'USER', FALSE),
+       ('user5', 'user5', 'USER', FALSE),
+       ('user6', 'user6', 'USER', FALSE),
+       ('user7', 'user7', 'USER', FALSE),
+       ('user8', 'user8', 'USER', FALSE),
+       ('user9', 'user9', 'USER', TRUE),
+       ('admin', 'admin', 'ADMIN', FALSE);
 
 INSERT INTO USER_INFO (id, nome, cognome, indirizzo, cap, provincia, stato)
 VALUES (1, 'Marco', 'Rossi', 'Via Roma 10', '00100', 'RM', 'Italia'),
@@ -40,7 +40,7 @@ INSERT INTO ORDERS (USER_ID, DATE, DELIVERY_STATUS, PAYMENT_STATUS)
 VALUES (1, '2025-04-01', 'PENDING', 'PENDING'), -- Mario compra 1 Laptop
        (2, '2025-04-02', 'PENDING', 'PAID'),    -- Luigi compra 2 Smartphone
        (3, '2025-04-03', 'DELIVERED', 'PAID'),  -- Anna compra 1 Cuffie Bluetooth
-       (4, '2025-04-04', 'SHIPPED', 'PENDING'); -- Carla compra 3 Smartwatch
+       (4, '2025-04-04', 'SHIPPED', 'PAID'); -- Carla compra 3 Smartwatch
 
 
 INSERT INTO ORDERS_DETAILS (ORDER_ID, PRODUCT_ID, QUANTITY)
